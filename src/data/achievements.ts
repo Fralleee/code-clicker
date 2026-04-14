@@ -1,0 +1,138 @@
+import type { AchievementDefinition } from "../types/game";
+
+export const ACHIEVEMENTS: AchievementDefinition[] = [
+  // Clicking
+  {
+    id: "hello_world",
+    name: "Hello, World!",
+    description: "Write your first line of code",
+    icon: "👋",
+    category: "clicking",
+    condition: { kind: "total_clicks", count: 1 },
+  },
+  {
+    id: "keyboard_warrior",
+    name: "Keyboard Warrior",
+    description: "Click 1,000 times",
+    icon: "⌨️",
+    category: "clicking",
+    condition: { kind: "total_clicks", count: 1000 },
+    reward: { kind: "click_bonus", multiplier: 1.05 },
+  },
+  {
+    id: "carpal_tunnel",
+    name: "Carpal Tunnel Syndrome",
+    description: "Click 10,000 times",
+    icon: "🤕",
+    category: "clicking",
+    condition: { kind: "total_clicks", count: 10000 },
+    reward: { kind: "click_bonus", multiplier: 1.1 },
+  },
+
+  // Production
+  {
+    id: "first_program",
+    name: "First Program",
+    description: "Produce 100 total lines of code",
+    icon: "📝",
+    category: "production",
+    condition: { kind: "total_loc", amount: 100 },
+  },
+  {
+    id: "code_monkey",
+    name: "Code Monkey",
+    description: "Produce 1,000,000 total lines of code",
+    icon: "🐒",
+    category: "production",
+    condition: { kind: "total_loc", amount: 1_000_000 },
+    reward: { kind: "production_bonus", multiplier: 1.05 },
+  },
+  {
+    id: "ten_x_engineer",
+    name: "10x Engineer",
+    description: "Reach 10,000 LoC per second",
+    icon: "🚀",
+    category: "production",
+    condition: { kind: "loc_per_second", amount: 10_000 },
+    reward: { kind: "production_bonus", multiplier: 1.1 },
+  },
+  {
+    id: "mass_production",
+    name: "Mass Production",
+    description: "Produce 1 billion total lines of code",
+    icon: "🏭",
+    category: "production",
+    condition: { kind: "total_loc", amount: 1_000_000_000 },
+    reward: { kind: "production_bonus", multiplier: 1.1 },
+  },
+
+  // Building
+  {
+    id: "first_hire",
+    name: "First Hire",
+    description: "Purchase your first building",
+    icon: "🤝",
+    category: "building",
+    condition: { kind: "total_buildings", count: 1 },
+  },
+  {
+    id: "growing_team",
+    name: "Growing Team",
+    description: "Own 50 total buildings",
+    icon: "👥",
+    category: "building",
+    condition: { kind: "total_buildings", count: 50 },
+    reward: { kind: "production_bonus", multiplier: 1.02 },
+  },
+  {
+    id: "intern_army",
+    name: "Intern Army",
+    description: "Own 100 Interns",
+    icon: "☕",
+    category: "building",
+    condition: { kind: "building_count", buildingId: "intern", count: 100 },
+    reward: { kind: "production_bonus", multiplier: 1.05 },
+  },
+  {
+    id: "ai_takeover",
+    name: "AI Takeover",
+    description: "Own 50 AI Coding Assistants",
+    icon: "🤖",
+    category: "building",
+    condition: {
+      kind: "building_count",
+      buildingId: "ai_assistant",
+      count: 50,
+    },
+    reward: { kind: "production_bonus", multiplier: 1.05 },
+  },
+
+  // Prestige
+  {
+    id: "first_ship",
+    name: "Version 1.0",
+    description: "Ship the product for the first time",
+    icon: "📦",
+    category: "prestige",
+    condition: { kind: "prestige_count", count: 1 },
+    reward: { kind: "production_bonus", multiplier: 1.05 },
+  },
+  {
+    id: "serial_shipper",
+    name: "Serial Shipper",
+    description: "Ship the product 10 times",
+    icon: "🚢",
+    category: "prestige",
+    condition: { kind: "prestige_count", count: 10 },
+    reward: { kind: "production_bonus", multiplier: 1.1 },
+  },
+  {
+    id: "tech_mogul",
+    name: "Tech Mogul",
+    description: "Earn 1,000 total reputation points",
+    icon: "👑",
+    category: "prestige",
+    condition: { kind: "reputation_points", amount: 1000 },
+    reward: { kind: "production_bonus", multiplier: 1.15 },
+  },
+];

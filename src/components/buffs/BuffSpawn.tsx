@@ -37,11 +37,12 @@ export function BuffSpawnLayer() {
       // Random position within the viewport, with padding
       const x = 100 + Math.random() * (window.innerWidth - 200);
       const y = 100 + Math.random() * (window.innerHeight - 200);
-      setSpawned({ key: spawnKey++, buff, x, y, spawnedAt: Date.now() });
+      const spawnedAt = Date.now();
+      setSpawned({ key: spawnKey++, buff, x, y, spawnedAt });
 
       // Auto-despawn after SPAWN_DURATION
       setTimeout(() => {
-        setSpawned((curr) => (curr?.spawnedAt === Date.now() - SPAWN_DURATION ? null : curr));
+        setSpawned((curr) => (curr?.spawnedAt === spawnedAt ? null : curr));
       }, SPAWN_DURATION);
 
       scheduleSpawn();

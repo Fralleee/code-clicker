@@ -44,9 +44,11 @@ function migrateV3toV4(state: GameState): GameState {
 }
 
 function migrateV4toV5(state: GameState): GameState {
-  // Remove autoBuildTimers and old upgrade IDs
-  const s = state as unknown as Record<string, unknown>;
-  if (s.autoBuildTimers) delete s.autoBuildTimers;
+  // Remove autoBuildTimers from old saves
+  if ("autoBuildTimers" in state) {
+    const { autoBuildTimers: _, ...rest } = state as GameState & { autoBuildTimers: unknown };
+    return rest as GameState;
+  }
   return state;
 }
 

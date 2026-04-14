@@ -1,9 +1,6 @@
 import { PRESTIGE_UPGRADES } from "../../data/prestige";
 import { useGameStore } from "../../store/gameStore";
-import {
-  selectPrestigeMultiplier,
-  selectReputationOnPrestige,
-} from "../../store/selectors";
+import { selectPrestigeMultiplier, selectReputationOnPrestige } from "../../store/selectors";
 import { formatNumber } from "../../utils/formatNumber";
 
 interface Props {
@@ -52,15 +49,11 @@ export function PrestigeModal({ open, onClose }: Props) {
           </div>
           <div className="flex justify-between">
             <span className="text-text-muted">Current Reputation</span>
-            <span className="font-mono text-accent-gold">
-              {formatNumber(repPoints)}
-            </span>
+            <span className="font-mono text-accent-gold">{formatNumber(repPoints)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-text-muted">Prestige Bonus</span>
-            <span className="font-mono text-accent-gold">
-              +{Math.round((prestigeMult - 1) * 100)}%
-            </span>
+            <span className="font-mono text-accent-gold">+{Math.round((prestigeMult - 1) * 100)}%</span>
           </div>
 
           {repOnPrestige > 0 && (
@@ -69,8 +62,7 @@ export function PrestigeModal({ open, onClose }: Props) {
                 Ship now for +{formatNumber(repOnPrestige)} reputation
               </div>
               <div className="text-xs text-text-muted">
-                This will reset your LoC, buildings, and upgrades. Reputation
-                and achievements are permanent.
+                This will reset your LoC, buildings, and upgrades. Reputation and achievements are permanent.
               </div>
             </div>
           )}
@@ -115,26 +107,12 @@ export function PrestigeModal({ open, onClose }: Props) {
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
                       <span>{pu.icon}</span>
-                      <span
-                        className={
-                          owned ? "text-accent-gold" : "text-text-primary"
-                        }
-                      >
-                        {pu.name}
-                      </span>
-                      {owned && (
-                        <span className="text-xs text-accent-green">Owned</span>
-                      )}
+                      <span className={owned ? "text-accent-gold" : "text-text-primary"}>{pu.name}</span>
+                      {owned && <span className="text-xs text-accent-green">Owned</span>}
                     </span>
-                    {!owned && (
-                      <span className="font-mono text-xs text-accent-gold">
-                        {pu.cost} rep
-                      </span>
-                    )}
+                    {!owned && <span className="font-mono text-xs text-accent-gold">{pu.cost} rep</span>}
                   </div>
-                  <div className="text-xs text-text-muted mt-0.5">
-                    {pu.description}
-                  </div>
+                  <div className="text-xs text-text-muted mt-0.5">{pu.description}</div>
                 </button>
               );
             })}

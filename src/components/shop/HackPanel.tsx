@@ -24,18 +24,12 @@ export function HackPanel() {
   const visibleHacks = HACKS.filter((h) => totalLoCEarned >= h.unlockThreshold);
 
   if (visibleHacks.length === 0) {
-    return (
-      <div className="text-center text-text-muted text-sm py-8">
-        Keep coding to unlock hacks...
-      </div>
-    );
+    return <div className="text-center text-text-muted text-sm py-8">Keep coding to unlock hacks...</div>;
   }
 
   return (
     <div className="space-y-2">
-      <p className="text-xs text-text-muted mb-2">
-        Boosts that add Tech Debt. Requires low TD to activate.
-      </p>
+      <p className="text-xs text-text-muted mb-2">Boosts that add Tech Debt. Requires low TD to activate.</p>
       {visibleHacks.map((hack) => (
         <HackButton
           key={hack.id}
@@ -67,9 +61,7 @@ function HackButton({
   const onCooldown = cooldownEnd > now;
   const cooldownTotal = hack.cooldownSeconds * 1000;
   const cooldownRemaining = onCooldown ? cooldownEnd - now : 0;
-  const cooldownProgress = onCooldown
-    ? cooldownRemaining / cooldownTotal
-    : 0;
+  const cooldownProgress = onCooldown ? cooldownRemaining / cooldownTotal : 0;
   const remainingSec = Math.ceil(cooldownRemaining / 1000);
 
   const tdCost = locPerSec * hack.techDebtCostSeconds;
@@ -96,23 +88,10 @@ function HackButton({
       <div className="flex items-center gap-3">
         {/* Radial cooldown icon */}
         <div className="relative w-10 h-10 shrink-0 flex items-center justify-center">
-          <span className={`text-xl ${onCooldown ? "opacity-40" : ""}`}>
-            {hack.icon}
-          </span>
+          <span className={`text-xl ${onCooldown ? "opacity-40" : ""}`}>{hack.icon}</span>
           {onCooldown && (
-            <svg
-              className="absolute inset-0 -rotate-90"
-              viewBox="0 0 36 36"
-              aria-hidden="true"
-            >
-              <circle
-                cx="18"
-                cy="18"
-                r={radius}
-                fill="none"
-                stroke="rgba(255,62,157,0.3)"
-                strokeWidth="3"
-              />
+            <svg className="absolute inset-0 -rotate-90" viewBox="0 0 36 36" aria-hidden="true">
+              <circle cx="18" cy="18" r={radius} fill="none" stroke="rgba(255,62,157,0.3)" strokeWidth="3" />
               <circle
                 cx="18"
                 cy="18"
@@ -136,26 +115,12 @@ function HackButton({
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm text-text-primary">
-            {hack.name}
-          </div>
-          <div className="text-xs text-text-muted mb-1">
-            {hack.description}
-          </div>
+          <div className="font-semibold text-sm text-text-primary">{hack.name}</div>
+          <div className="text-xs text-text-muted mb-1">{hack.description}</div>
           <div className="flex items-center gap-3 text-xs">
-            <span className="text-accent-pink">
-              +{formatNumber(tdCost)} TD
-            </span>
-            <span
-              className={
-                tooMuchDebt
-                  ? "text-red-400 font-semibold"
-                  : "text-text-muted"
-              }
-            >
-              {tooMuchDebt
-                ? "Too much debt!"
-                : `Max TD: ${formatNumber(maxTD)}`}
+            <span className="text-accent-pink">+{formatNumber(tdCost)} TD</span>
+            <span className={tooMuchDebt ? "text-red-400 font-semibold" : "text-text-muted"}>
+              {tooMuchDebt ? "Too much debt!" : `Max TD: ${formatNumber(maxTD)}`}
             </span>
           </div>
         </div>

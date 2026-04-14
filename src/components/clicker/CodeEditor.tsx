@@ -54,8 +54,7 @@ export function CodeEditor() {
       }`}
       onClick={handleClick}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ")
-          handleClick(e as unknown as React.MouseEvent);
+        if (e.key === "Enter" || e.key === " ") handleClick(e as unknown as React.MouseEvent);
       }}
       role="button"
       tabIndex={0}
@@ -67,18 +66,14 @@ export function CodeEditor() {
           <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
           <div className="w-3 h-3 rounded-full bg-green-500/80" />
         </div>
-        <span className="text-xs text-text-muted ml-2 font-mono">
-          main.ts - CodeClicker IDE
-        </span>
+        <span className="text-xs text-text-muted ml-2 font-mono">main.ts - CodeClicker IDE</span>
       </div>
 
       {/* Code area */}
       <div className="flex-1 bg-bg-editor overflow-y-auto p-4 font-mono text-sm leading-relaxed min-h-0">
         {lines.map((line, i) => (
           <div key={line.id} className="flex">
-            <span className="w-8 text-right text-text-muted/40 mr-4 shrink-0 select-none">
-              {i + 1}
-            </span>
+            <span className="w-8 text-right text-text-muted/40 mr-4 shrink-0 select-none">{i + 1}</span>
             <span className="text-text-secondary">{line.text}</span>
           </div>
         ))}

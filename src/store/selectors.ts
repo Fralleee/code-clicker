@@ -1,6 +1,6 @@
 import { ACHIEVEMENTS } from "../data/achievements";
 import { BUILDINGS } from "../data/buildings";
-import { getPrestigeThreshold, BASE_PRESTIGE_THRESHOLD } from "../data/prestige";
+import { BASE_PRESTIGE_THRESHOLD, getPrestigeThreshold } from "../data/prestige";
 import { UPGRADES } from "../data/upgrades";
 import type { GameState } from "../types/game";
 
@@ -11,18 +11,12 @@ export function selectPrestigeMultiplier(state: GameState): number {
 }
 
 export function selectAngelInvestorBonus(state: GameState): number {
-  const count = state.prestige.prestigeUpgrades.filter(
-    (id) => id === "angel_investor",
-  ).length;
+  const count = state.prestige.prestigeUpgrades.filter((id) => id === "angel_investor").length;
   return 1.1 ** count;
 }
 
 export function selectCostReduction(state: GameState): number {
-  const reduction = state.prestige.prestigeUpgrades.includes(
-    "better_interviews",
-  )
-    ? 0.95
-    : 1;
+  const reduction = state.prestige.prestigeUpgrades.includes("better_interviews") ? 0.95 : 1;
   return reduction;
 }
 
@@ -74,17 +68,11 @@ export function selectAchievementClickBonus(state: GameState): number {
 
 // === Upgrade Multipliers ===
 
-export function selectBuildingMultiplier(
-  state: GameState,
-  buildingId: string,
-): number {
+export function selectBuildingMultiplier(state: GameState, buildingId: string): number {
   let multiplier = 1;
   for (const upId of state.purchasedUpgrades) {
     const upgrade = UPGRADES.find((u) => u.id === upId);
-    if (
-      upgrade?.effect.kind === "building_boost" &&
-      upgrade.effect.buildingId === buildingId
-    ) {
+    if (upgrade?.effect.kind === "building_boost" && upgrade.effect.buildingId === buildingId) {
       multiplier *= upgrade.effect.multiplier;
     }
   }
@@ -177,10 +165,7 @@ function selectTdReduction(state: GameState, buildingId: string): number {
   let reduction = 1;
   for (const upId of state.purchasedUpgrades) {
     const upgrade = UPGRADES.find((u) => u.id === upId);
-    if (
-      upgrade?.effect.kind === "td_reduction" &&
-      upgrade.effect.buildingId === buildingId
-    ) {
+    if (upgrade?.effect.kind === "td_reduction" && upgrade.effect.buildingId === buildingId) {
       reduction *= 1 - upgrade.effect.reduction;
     }
   }
@@ -211,10 +196,7 @@ export function selectNetTechDebtPerSecond(state: GameState): number {
 // === Building Production ===
 
 /** Mastery: 500 count + all building_boost upgrades purchased = 10x */
-export function selectBuildingMastery(
-  state: GameState,
-  buildingId: string,
-): boolean {
+export function selectBuildingMastery(state: GameState, buildingId: string): boolean {
   const owned = state.buildings.find((b) => b.id === buildingId);
   if (!owned || owned.count < 500) return false;
   // Only check standard tier upgrades (buildingId_1 through buildingId_13)
@@ -227,10 +209,7 @@ export function selectBuildingMastery(
   return true;
 }
 
-export function selectBuildingProduction(
-  state: GameState,
-  buildingId: string,
-): number {
+export function selectBuildingProduction(state: GameState, buildingId: string): number {
   const def = BUILDINGS.find((b) => b.id === buildingId);
   const owned = state.buildings.find((b) => b.id === buildingId);
   if (!def || !owned || owned.count === 0) return 0;
@@ -296,9 +275,7 @@ export function selectClickValue(state: GameState): number {
   const prestigeClick = selectPrestigeClickBonus(state);
 
   // Click buff multiplier applies to the ENTIRE click value including CPS bonus
-  const rawValue =
-    Math.floor(baseClick * clickMult * prestigeMult * achBonus * prestigeClick) +
-    locPerSec * cpsPercent;
+  const rawValue = Math.floor(baseClick * clickMult * prestigeMult * achBonus * prestigeClick) + locPerSec * cpsPercent;
   return Math.floor(rawValue * buffMult);
 }
 
@@ -310,12 +287,8 @@ export function selectCanPrestige(state: GameState): boolean {
 }
 
 export function selectReputationOnPrestige(state: GameState): number {
-  const hasBoost = state.prestige.prestigeUpgrades.includes(
-    "serial_entrepreneur",
-  );
-  const base = Math.floor(
-    Math.sqrt(state.resources.totalLoCEarned / BASE_PRESTIGE_THRESHOLD),
-  );
+  const hasBoost = state.prestige.prestigeUpgrades.includes("serial_entrepreneur");
+  const base = Math.floor(Math.sqrt(state.resources.totalLoCEarned / BASE_PRESTIGE_THRESHOLD));
   let rep = hasBoost ? Math.floor(base * 1.5) : base;
   // Reputation Machine: double reputation
   if (state.prestige.prestigeUpgrades.includes("reputation_double")) {

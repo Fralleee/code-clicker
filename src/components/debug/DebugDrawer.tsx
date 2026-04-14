@@ -33,9 +33,7 @@ function DebugDrawerInner() {
         <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50" />
         <Drawer.Content className="fixed top-0 right-0 bottom-0 w-96 z-50 bg-bg-surface border-l border-white/10 outline-none flex flex-col">
           <div className="p-4 border-b border-white/5">
-            <Drawer.Title className="text-lg font-bold text-red-400">
-              Debug Panel
-            </Drawer.Title>
+            <Drawer.Title className="text-lg font-bold text-red-400">Debug Panel</Drawer.Title>
             <Drawer.Description className="text-xs text-text-muted">
               Development tools for testing game mechanics
             </Drawer.Description>
@@ -96,8 +94,7 @@ function ResourceSection() {
     <div className="space-y-2">
       <SectionHeader title="Resources" />
       <div className="text-xs text-text-muted">
-        Current LoC:{" "}
-        <span className="font-mono text-text-primary">{formatNumber(loc)}</span>
+        Current LoC: <span className="font-mono text-text-primary">{formatNumber(loc)}</span>
       </div>
       <div className="flex flex-wrap gap-1">
         {amounts.map((amt) => (
@@ -119,10 +116,7 @@ function TechDebtSection() {
       resources: {
         ...state.resources,
         techDebt: Math.max(0, (state.resources.techDebt ?? 0) + amount),
-        peakTechDebt: Math.max(
-          state.resources.peakTechDebt ?? 0,
-          (state.resources.techDebt ?? 0) + amount,
-        ),
+        peakTechDebt: Math.max(state.resources.peakTechDebt ?? 0, (state.resources.techDebt ?? 0) + amount),
       },
     });
   };
@@ -138,8 +132,7 @@ function TechDebtSection() {
     <div className="space-y-2">
       <SectionHeader title="Tech Debt" />
       <div className="text-xs text-text-muted">
-        Current TD:{" "}
-        <span className="font-mono text-accent-pink">{formatNumber(td)}</span>
+        Current TD: <span className="font-mono text-accent-pink">{formatNumber(td)}</span>
       </div>
       <div className="flex flex-wrap gap-1">
         <DebugButton onClick={() => addTD(100)}>+100 TD</DebugButton>
@@ -159,9 +152,7 @@ function BuildingSection() {
   const setBuildingsDirectly = (buildingId: string, count: number) => {
     const state = useGameStore.getState();
     useGameStore.setState({
-      buildings: state.buildings.map((b) =>
-        b.id === buildingId ? { ...b, count } : b,
-      ),
+      buildings: state.buildings.map((b) => (b.id === buildingId ? { ...b, count } : b)),
     });
   };
 
@@ -173,21 +164,15 @@ function BuildingSection() {
         return (
           <div key={def.id} className="flex items-center gap-2">
             <span className="text-sm">{def.icon}</span>
-            <span className="text-xs text-text-secondary flex-1 truncate">
-              {def.name}
-            </span>
-            <span className="font-mono text-xs text-text-muted w-8 text-right">
-              {owned?.count ?? 0}
-            </span>
+            <span className="text-xs text-text-secondary flex-1 truncate">{def.name}</span>
+            <span className="font-mono text-xs text-text-muted w-8 text-right">{owned?.count ?? 0}</span>
             <div className="flex gap-0.5">
               <DebugButton
                 onClick={() => {
                   // Free purchase, bypass cost
                   const state = useGameStore.getState();
                   useGameStore.setState({
-                    buildings: state.buildings.map((b) =>
-                      b.id === def.id ? { ...b, count: b.count + 1 } : b,
-                    ),
+                    buildings: state.buildings.map((b) => (b.id === def.id ? { ...b, count: b.count + 1 } : b)),
                   });
                 }}
               >
@@ -197,17 +182,13 @@ function BuildingSection() {
                 onClick={() => {
                   const state = useGameStore.getState();
                   useGameStore.setState({
-                    buildings: state.buildings.map((b) =>
-                      b.id === def.id ? { ...b, count: b.count + 10 } : b,
-                    ),
+                    buildings: state.buildings.map((b) => (b.id === def.id ? { ...b, count: b.count + 10 } : b)),
                   });
                 }}
               >
                 +10
               </DebugButton>
-              <DebugButton onClick={() => setBuildingsDirectly(def.id, 100)}>
-                =100
-              </DebugButton>
+              <DebugButton onClick={() => setBuildingsDirectly(def.id, 100)}>=100</DebugButton>
             </div>
           </div>
         );
@@ -245,12 +226,7 @@ function BuffSection() {
     }
   };
 
-  const applySpecificBuff = (
-    name: string,
-    prodMult?: number,
-    clickMult?: number,
-    duration = 60,
-  ) => {
+  const applySpecificBuff = (name: string, prodMult?: number, clickMult?: number, duration = 60) => {
     addBuff({
       id: `debug_${name}_${Date.now()}`,
       buffId: name,
@@ -265,20 +241,10 @@ function BuffSection() {
       <SectionHeader title="Buffs" />
       <div className="flex flex-wrap gap-1">
         <DebugButton onClick={spawnAndApplyBuff}>Random Buff</DebugButton>
-        <DebugButton onClick={() => applySpecificBuff("prod_x10", 10)}>
-          10x Prod (60s)
-        </DebugButton>
-        <DebugButton onClick={() => applySpecificBuff("prod_x100", 100)}>
-          100x Prod (60s)
-        </DebugButton>
-        <DebugButton
-          onClick={() => applySpecificBuff("click_x50", undefined, 50)}
-        >
-          50x Click (60s)
-        </DebugButton>
-        <DebugButton onClick={() => applySpecificBuff("mega", 1000, 1000, 120)}>
-          1000x ALL (2min)
-        </DebugButton>
+        <DebugButton onClick={() => applySpecificBuff("prod_x10", 10)}>10x Prod (60s)</DebugButton>
+        <DebugButton onClick={() => applySpecificBuff("prod_x100", 100)}>100x Prod (60s)</DebugButton>
+        <DebugButton onClick={() => applySpecificBuff("click_x50", undefined, 50)}>50x Click (60s)</DebugButton>
+        <DebugButton onClick={() => applySpecificBuff("mega", 1000, 1000, 120)}>1000x ALL (2min)</DebugButton>
       </div>
     </div>
   );
@@ -301,9 +267,7 @@ function TimeSection() {
   return (
     <div className="space-y-2">
       <SectionHeader title="Time Travel" />
-      <p className="text-xs text-text-muted">
-        Simulate passive production as if time passed
-      </p>
+      <p className="text-xs text-text-muted">Simulate passive production as if time passed</p>
       <div className="flex flex-wrap gap-1">
         <DebugButton onClick={() => simulateTime(60)}>+1 min</DebugButton>
         <DebugButton onClick={() => simulateTime(600)}>+10 min</DebugButton>
@@ -369,9 +333,7 @@ function DangerSection() {
             >
               Confirm Reset
             </DebugButton>
-            <DebugButton onClick={() => setConfirmed(false)}>
-              Cancel
-            </DebugButton>
+            <DebugButton onClick={() => setConfirmed(false)}>Cancel</DebugButton>
           </div>
         )}
       </div>

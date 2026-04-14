@@ -31,9 +31,7 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
   const hasTD = td > 0;
   const penaltyPercent = Math.round((1 - debtMult) * 100);
   const isRefactoring = (refactoringUntil ?? 0) > Date.now();
-  const refactorRemaining = isRefactoring
-    ? Math.ceil(((refactoringUntil ?? 0) - Date.now()) / 1000)
-    : 0;
+  const refactorRemaining = isRefactoring ? Math.ceil(((refactoringUntil ?? 0) - Date.now()) / 1000) : 0;
 
   return (
     <header className="flex items-center justify-between px-6 py-2.5 bg-bg-editor-bar border-b border-white/5 shrink-0">
@@ -42,50 +40,34 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
         {/* Main LoC counter */}
         <div className="flex items-center gap-3 pr-5 border-r border-white/10">
           <div>
-            <div className="font-mono text-2xl font-bold text-text-primary tracking-tight">
-              {formatNumber(loc)}
-            </div>
-            <div className="text-[10px] text-text-muted uppercase tracking-wider">
-              Lines of Code
-            </div>
+            <div className="font-mono text-2xl font-bold text-text-primary tracking-tight">{formatNumber(loc)}</div>
+            <div className="text-[10px] text-text-muted uppercase tracking-wider">Lines of Code</div>
           </div>
         </div>
 
         {/* Production stats */}
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-1">
-            <span className="text-[10px] text-text-muted uppercase w-12">
-              Per sec
-            </span>
+            <span className="text-[10px] text-text-muted uppercase w-12">Per sec</span>
             {isRefactoring ? (
               <span className="font-mono text-sm text-accent-gold font-semibold animate-pulse">
                 Refactoring... {refactorRemaining}s
               </span>
             ) : (
-              <span className="font-mono text-sm text-accent-cyan font-semibold">
-                {formatRate(locPerSec)}
-              </span>
+              <span className="font-mono text-sm text-accent-cyan font-semibold">{formatRate(locPerSec)}</span>
             )}
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-[10px] text-text-muted uppercase w-12">
-              Per click
-            </span>
-            <span className="font-mono text-sm text-text-primary">
-              {formatNumber(clickValue)}
-            </span>
+            <span className="text-[10px] text-text-muted uppercase w-12">Per click</span>
+            <span className="font-mono text-sm text-text-primary">{formatNumber(clickValue)}</span>
           </div>
         </div>
 
         {/* Reputation (only when > 0) */}
         {reputation > 0 && (
           <div className="flex flex-col gap-0.5 pl-5 border-l border-white/10">
-            <span className="font-mono text-sm text-accent-gold font-semibold">
-              {formatNumber(reputation)}
-            </span>
-            <span className="text-[10px] text-text-muted uppercase tracking-wider">
-              Reputation
-            </span>
+            <span className="font-mono text-sm text-accent-gold font-semibold">{formatNumber(reputation)}</span>
+            <span className="text-[10px] text-text-muted uppercase tracking-wider">Reputation</span>
           </div>
         )}
 
@@ -93,9 +75,7 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
         {(hasTD || netTdPerSec !== 0) && (
           <div className="flex flex-col gap-0.5 pl-5 border-l border-white/10">
             <div className="flex items-center gap-1.5">
-              <span className="font-mono text-sm text-accent-pink font-semibold">
-                {formatNumber(td)}
-              </span>
+              <span className="font-mono text-sm text-accent-pink font-semibold">{formatNumber(td)}</span>
               <span
                 className={`text-[10px] font-mono ${netTdPerSec <= 0 ? "text-accent-green" : "text-accent-pink/60"}`}
               >
@@ -106,9 +86,7 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
             <span className="text-[10px] text-text-muted uppercase tracking-wider">
               Tech Debt
               {penaltyPercent > 0 && (
-                <span className="text-accent-pink ml-1 normal-case">
-                  (-{penaltyPercent}% LoC)
-                </span>
+                <span className="text-accent-pink ml-1 normal-case">(-{penaltyPercent}% LoC)</span>
               )}
             </span>
             {isRefactoring ? (
@@ -152,9 +130,7 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
         >
           Ship Product
           {canPrestige && repOnPrestige > 0 && (
-            <span className="ml-1 text-xs opacity-75">
-              +{formatNumber(repOnPrestige)} rep
-            </span>
+            <span className="ml-1 text-xs opacity-75">+{formatNumber(repOnPrestige)} rep</span>
           )}
         </button>
       </div>

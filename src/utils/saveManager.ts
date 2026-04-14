@@ -14,8 +14,7 @@ function migrateV1toV2(state: GameState): GameState {
     ...state,
     prestige: {
       ...state.prestige,
-      lifetimeLoCEarned:
-        state.prestige.lifetimeLoCEarned ?? state.resources.totalLoCEarned,
+      lifetimeLoCEarned: state.prestige.lifetimeLoCEarned ?? state.resources.totalLoCEarned,
     },
     activeBuffs: state.activeBuffs ?? [],
   };
@@ -40,9 +39,7 @@ function migrateV3toV4(state: GameState): GameState {
     purchasedUpgrades: (state.purchasedUpgrades ?? []).filter(
       (id) => !id.startsWith("pm_") && id !== "auto_pm_meetings",
     ),
-    buildings: (state.buildings ?? []).filter(
-      (b) => b.id !== "product_manager",
-    ),
+    buildings: (state.buildings ?? []).filter((b) => b.id !== "product_manager"),
   };
 }
 

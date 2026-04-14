@@ -1,73 +1,37 @@
-# React + TypeScript + Vite
+# CodeClicker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A programming-themed idle/incremental game.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React 19** + **TypeScript** + **Vite**
+- **Zustand** with `subscribeWithSelector` for state management
+- **Tailwind CSS v4** for styling
+- **Biome** for linting/formatting
+- **Bun** as package manager
+- **Vaul** for drawer components
 
-## React Compiler
+## Architecture
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- `src/data/` — Game data as typed constants (buildings, upgrades, achievements, hacks, bugs, buffs, prestige)
+- `src/store/gameStore.ts` — Single Zustand store for all game state and actions
+- `src/store/selectors.ts` — Pure functions computing derived state (production, click value, tech debt penalty, mastery)
+- `src/types/game.ts` — All TypeScript interfaces and discriminated unions
+- `src/hooks/` — Game loop (50ms tick), auto-save, achievement checker
+- `src/utils/` — Number formatting, cost calculations, save/load (localStorage with versioned migrations)
 
-## Expanding the ESLint configuration
+## Key Design Decisions
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Data-driven**: All game content defined in `src/data/`. Adding a building/upgrade means editing one array.
+- **Multiplicative production chain**: Each building's output passes through ~10 independent multiplier layers (upgrades, prestige, buffs, tech debt, mastery).
+- **Tech debt as organic mechanic**: Every building generates TD proportional to output. Penalty scales dynamically with production rate, not static thresholds.
+- **Save versioning**: `SAVE_VERSION` in saveManager.ts with chained migration functions for backward compatibility.
+- **Granular Zustand selectors**: Components subscribe to specific state slices to avoid full-app re-renders on 50ms ticks.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Scripts
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+bun dev        # Start dev server
+bun run build  # Type-check + production build
+bun run lint   # Biome check
 ```

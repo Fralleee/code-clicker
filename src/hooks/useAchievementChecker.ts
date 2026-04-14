@@ -39,9 +39,7 @@ export function useAchievementChecker() {
               met = curr.totalClicks >= cond.count;
               break;
             case "building_count": {
-              const owned = curr.buildings.find(
-                (b) => b.id === cond.buildingId,
-              );
+              const owned = curr.buildings.find((b) => b.id === cond.buildingId);
               met = (owned?.count ?? 0) >= cond.count;
               break;
             }

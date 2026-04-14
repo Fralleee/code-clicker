@@ -124,10 +124,7 @@ const MINOR_BUGS = BUG_TYPES.filter((b) => b.severity === "minor");
 const MAJOR_BUGS = BUG_TYPES.filter((b) => b.severity === "major");
 const CRITICAL_BUGS = BUG_TYPES.filter((b) => b.severity === "critical");
 
-export function pickRandomBug(
-  rawLocPerSec: number,
-  techDebt: number,
-): BugDefinition {
+export function pickRandomBug(rawLocPerSec: number, techDebt: number): BugDefinition {
   const tdRatio = rawLocPerSec > 0 ? techDebt / rawLocPerSec : 0;
 
   // Weight severity based on TD relative to production
@@ -146,10 +143,7 @@ export function pickRandomBug(
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-export function getMaxActiveBugs(
-  rawLocPerSec: number,
-  techDebt: number,
-): number {
+export function getMaxActiveBugs(rawLocPerSec: number, techDebt: number): number {
   if (rawLocPerSec <= 0) return 1;
   const tdRatio = techDebt / rawLocPerSec;
   if (tdRatio < 2) return 1;
@@ -157,17 +151,12 @@ export function getMaxActiveBugs(
   return 3;
 }
 
-export function getBugSpawnInterval(
-  rawLocPerSec: number,
-  techDebt: number,
-): { min: number; max: number } {
-  if (techDebt < 100 && rawLocPerSec < 1)
-    return { min: Number.POSITIVE_INFINITY, max: Number.POSITIVE_INFINITY };
+export function getBugSpawnInterval(rawLocPerSec: number, techDebt: number): { min: number; max: number } {
+  if (techDebt < 100 && rawLocPerSec < 1) return { min: Number.POSITIVE_INFINITY, max: Number.POSITIVE_INFINITY };
 
   const tdRatio = rawLocPerSec > 0 ? techDebt / rawLocPerSec : 0;
 
-  if (tdRatio < 1)
-    return { min: Number.POSITIVE_INFINITY, max: Number.POSITIVE_INFINITY };
+  if (tdRatio < 1) return { min: Number.POSITIVE_INFINITY, max: Number.POSITIVE_INFINITY };
 
   // Scale spawn rate with TD ratio
   const scale = Math.min(tdRatio / 15, 1);

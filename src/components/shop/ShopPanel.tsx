@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { useGameStore } from "../../store/gameStore";
-import {
-  selectVisibleBuildings,
-  selectVisibleUpgrades,
-} from "../../store/selectors";
+import { selectVisibleBuildings, selectVisibleUpgrades } from "../../store/selectors";
 import type { BuyQuantity } from "../../types/game";
 import { formatNumber } from "../../utils/formatNumber";
 import { BuildingCard } from "./BuildingCard";
@@ -18,12 +15,8 @@ function MysteryBuildingCard({ cost }: { cost: number }) {
         <span className="text-2xl grayscale opacity-50">???</span>
         <div className="flex-1">
           <div className="font-semibold text-text-muted text-sm">???</div>
-          <div className="text-xs text-text-muted/60 italic">
-            Keep coding to discover...
-          </div>
-          <div className="font-mono text-xs text-text-muted mt-1">
-            {formatNumber(cost)} LoC
-          </div>
+          <div className="text-xs text-text-muted/60 italic">Keep coding to discover...</div>
+          <div className="font-mono text-xs text-text-muted mt-1">{formatNumber(cost)} LoC</div>
         </div>
       </div>
     </div>
@@ -54,9 +47,7 @@ export function ShopPanel() {
           type="button"
           onClick={() => setTab("buildings")}
           className={`flex-1 px-3 py-1.5 rounded text-xs font-semibold transition-colors cursor-pointer ${
-            tab === "buildings"
-              ? "bg-accent-cyan/15 text-accent-cyan"
-              : "text-text-muted hover:text-text-secondary"
+            tab === "buildings" ? "bg-accent-cyan/15 text-accent-cyan" : "text-text-muted hover:text-text-secondary"
           }`}
         >
           Buildings
@@ -65,16 +56,12 @@ export function ShopPanel() {
           type="button"
           onClick={() => setTab("upgrades")}
           className={`flex-1 px-3 py-1.5 rounded text-xs font-semibold transition-colors cursor-pointer ${
-            tab === "upgrades"
-              ? "bg-accent-purple/15 text-accent-purple"
-              : "text-text-muted hover:text-text-secondary"
+            tab === "upgrades" ? "bg-accent-purple/15 text-accent-purple" : "text-text-muted hover:text-text-secondary"
           }`}
         >
           Upgrades
           {upgrades.length > 0 && (
-            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-accent-purple/20 text-[10px]">
-              {upgrades.length}
-            </span>
+            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-accent-purple/20 text-[10px]">{upgrades.length}</span>
           )}
         </button>
       </div>
@@ -91,9 +78,7 @@ export function ShopPanel() {
                   type="button"
                   onClick={() => setBuyQty(q)}
                   className={`px-2 py-0.5 rounded text-xs font-mono transition-colors cursor-pointer ${
-                    buyQty === q
-                      ? "bg-accent-cyan/20 text-accent-cyan"
-                      : "text-text-muted hover:text-text-secondary"
+                    buyQty === q ? "bg-accent-cyan/20 text-accent-cyan" : "text-text-muted hover:text-text-secondary"
                   }`}
                 >
                   {q === "max" ? "Max" : `x${q}`}
@@ -102,22 +87,13 @@ export function ShopPanel() {
             </div>
 
             {buildings.length === 0 ? (
-              <div className="text-center text-text-muted text-sm py-8">
-                Click to earn your first lines of code!
-              </div>
+              <div className="text-center text-text-muted text-sm py-8">Click to earn your first lines of code!</div>
             ) : (
               buildings.map((vb) =>
                 vb.visibility === "mystery" ? (
-                  <MysteryBuildingCard
-                    key={vb.building.id}
-                    cost={vb.building.baseCost}
-                  />
+                  <MysteryBuildingCard key={vb.building.id} cost={vb.building.baseCost} />
                 ) : (
-                  <BuildingCard
-                    key={vb.building.id}
-                    building={vb.building}
-                    buyQuantity={buyQty}
-                  />
+                  <BuildingCard key={vb.building.id} building={vb.building} buyQuantity={buyQty} />
                 ),
               )
             )}
@@ -126,16 +102,12 @@ export function ShopPanel() {
 
         {tab === "upgrades" &&
           (upgrades.length === 0 ? (
-            <div className="text-center text-text-muted text-sm py-8">
-              Keep coding to unlock upgrades...
-            </div>
+            <div className="text-center text-text-muted text-sm py-8">Keep coding to unlock upgrades...</div>
           ) : (
             <>
               <button
                 type="button"
-                disabled={!upgrades.some(
-                  (u) => useGameStore.getState().resources.linesOfCode >= u.cost,
-                )}
+                disabled={!upgrades.some((u) => useGameStore.getState().resources.linesOfCode >= u.cost)}
                 onClick={() => {
                   let bought = true;
                   while (bought) {

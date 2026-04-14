@@ -1,12 +1,12 @@
 const SUFFIXES = [
   "",
-  "K",    // 10^3
-  "M",    // 10^6
-  "B",    // 10^9
-  "T",    // 10^12
-  "Qa",   // 10^15
-  "Qt",   // 10^18
-  "Sx",   // 10^21
+  "K", // 10^3
+  "M", // 10^6
+  "B", // 10^9
+  "T", // 10^12
+  "Qa", // 10^15
+  "Qt", // 10^18
+  "Sx", // 10^21
 ];
 
 export function formatNumber(n: number, decimals: number = 1): string {

@@ -41,24 +41,14 @@ export function UpgradeCard({ upgrade }: Props) {
     >
       <div className="flex items-center gap-2 mb-1">
         <span className="text-lg">{upgrade.icon}</span>
-        <span className="font-semibold text-sm text-text-primary truncate">
-          {upgrade.name}
-        </span>
+        <span className="font-semibold text-sm text-text-primary truncate">{upgrade.name}</span>
       </div>
-      <div className="text-xs text-text-muted mb-2 line-clamp-2">
-        {upgrade.description}
-      </div>
+      <div className="text-xs text-text-muted mb-2 line-clamp-2">{upgrade.description}</div>
       <div className="flex items-center justify-between">
-        <span
-          className={`font-mono text-xs ${
-            canAfford ? "text-accent-green" : "text-accent-pink"
-          }`}
-        >
+        <span className={`font-mono text-xs ${canAfford ? "text-accent-green" : "text-accent-pink"}`}>
           {formatNumber(upgrade.cost)} LoC
         </span>
-        <span className="text-xs text-accent-purple">
-          {effectLabel(upgrade)}
-        </span>
+        <span className="text-xs text-accent-purple">{effectLabel(upgrade)}</span>
       </div>
     </button>
   );

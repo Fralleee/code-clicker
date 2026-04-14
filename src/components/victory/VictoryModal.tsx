@@ -1,10 +1,7 @@
 import { BUILDINGS } from "../../data/buildings";
 import { UPGRADES } from "../../data/upgrades";
 import { useGameStore } from "../../store/gameStore";
-import {
-  selectLocPerSecond,
-  selectTotalBuildings,
-} from "../../store/selectors";
+import { selectLocPerSecond, selectTotalBuildings } from "../../store/selectors";
 import { formatNumber } from "../../utils/formatNumber";
 
 interface Props {
@@ -43,9 +40,7 @@ export function VictoryModal({ open, onClose }: Props) {
         {/* Header with confetti-style decoration */}
         <div className="relative bg-gradient-to-b from-accent-gold/10 to-transparent px-8 pt-8 pb-4 text-center">
           {/* Decorative elements */}
-          <div className="absolute top-4 left-6 text-3xl animate-[bob_2s_ease-in-out_infinite]">
-            🎉
-          </div>
+          <div className="absolute top-4 left-6 text-3xl animate-[bob_2s_ease-in-out_infinite]">🎉</div>
           <div
             className="absolute top-6 right-6 text-2xl animate-[bob_2.5s_ease-in-out_infinite]"
             style={{ animationDelay: "0.5s" }}
@@ -66,9 +61,7 @@ export function VictoryModal({ open, onClose }: Props) {
           </div>
 
           <div className="text-5xl mb-3">👑</div>
-          <h1 className="text-2xl font-bold text-accent-gold mb-1">
-            You Did It!
-          </h1>
+          <h1 className="text-2xl font-bold text-accent-gold mb-1">You Did It!</h1>
           <p className="text-sm text-text-secondary">
             Every building built. Every upgrade purchased.
             <br />
@@ -78,92 +71,33 @@ export function VictoryModal({ open, onClose }: Props) {
 
         {/* Stats grid */}
         <div className="flex-1 overflow-y-auto px-8 py-6">
-          <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">
-            Final Stats
-          </h2>
+          <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Final Stats</h2>
 
           <div className="grid grid-cols-2 gap-3 mb-6">
-            <StatCard
-              label="Total LoC Written"
-              value={formatNumber(resources.totalLoCEarned)}
-              icon="📝"
-            />
-            <StatCard
-              label="Current LoC/sec"
-              value={formatNumber(locPerSec)}
-              icon="⚡"
-            />
-            <StatCard
-              label="Total Clicks"
-              value={formatNumber(resources.totalClicks)}
-              icon="👆"
-            />
-            <StatCard
-              label="Highest Single Click"
-              value={formatNumber(stats.highestSingleClick)}
-              icon="💥"
-            />
-            <StatCard
-              label="Peak LoC/sec"
-              value={formatNumber(stats.highestLocPerSecond)}
-              icon="📈"
-            />
-            <StatCard
-              label="Total Time Played"
-              value={formatTime(stats.totalTimePlayed)}
-              icon="⏱️"
-            />
-            <StatCard
-              label="Times Shipped"
-              value={prestige.timesShipped.toString()}
-              icon="📦"
-            />
-            <StatCard
-              label="Total Reputation"
-              value={formatNumber(prestige.totalReputationEarned)}
-              icon="⭐"
-            />
-            <StatCard
-              label="Buildings Owned"
-              value={totalBuildings.toString()}
-              icon="🏗️"
-            />
-            <StatCard
-              label="Upgrades Purchased"
-              value={`${totalUpgrades}/${maxUpgrades}`}
-              icon="⬆️"
-            />
-            <StatCard
-              label="Achievements"
-              value={achievements.length.toString()}
-              icon="🏆"
-            />
-            <StatCard
-              label="Peak Tech Debt"
-              value={formatNumber(resources.peakTechDebt)}
-              icon="💳"
-            />
+            <StatCard label="Total LoC Written" value={formatNumber(resources.totalLoCEarned)} icon="📝" />
+            <StatCard label="Current LoC/sec" value={formatNumber(locPerSec)} icon="⚡" />
+            <StatCard label="Total Clicks" value={formatNumber(resources.totalClicks)} icon="👆" />
+            <StatCard label="Highest Single Click" value={formatNumber(stats.highestSingleClick)} icon="💥" />
+            <StatCard label="Peak LoC/sec" value={formatNumber(stats.highestLocPerSecond)} icon="📈" />
+            <StatCard label="Total Time Played" value={formatTime(stats.totalTimePlayed)} icon="⏱️" />
+            <StatCard label="Times Shipped" value={prestige.timesShipped.toString()} icon="📦" />
+            <StatCard label="Total Reputation" value={formatNumber(prestige.totalReputationEarned)} icon="⭐" />
+            <StatCard label="Buildings Owned" value={totalBuildings.toString()} icon="🏗️" />
+            <StatCard label="Upgrades Purchased" value={`${totalUpgrades}/${maxUpgrades}`} icon="⬆️" />
+            <StatCard label="Achievements" value={achievements.length.toString()} icon="🏆" />
+            <StatCard label="Peak Tech Debt" value={formatNumber(resources.peakTechDebt)} icon="💳" />
           </div>
 
           {/* Building roster */}
-          <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">
-            Your Team
-          </h2>
+          <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">Your Team</h2>
           <div className="grid grid-cols-3 gap-2 mb-6">
             {BUILDINGS.map((def) => {
               const owned = buildings.find((b) => b.id === def.id);
               return (
-                <div
-                  key={def.id}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded bg-bg-card/50 text-xs"
-                >
+                <div key={def.id} className="flex items-center gap-2 px-2 py-1.5 rounded bg-bg-card/50 text-xs">
                   <span>{def.icon}</span>
-                  <span className="text-text-secondary truncate flex-1">
-                    {def.name}
-                  </span>
-                  <span className="font-mono text-accent-cyan">
-                    {owned?.count ?? 0}
-                  </span>
+                  <span className="text-text-secondary truncate flex-1">{def.name}</span>
+                  <span className="font-mono text-accent-cyan">{owned?.count ?? 0}</span>
                 </div>
               );
             })}
@@ -172,23 +106,19 @@ export function VictoryModal({ open, onClose }: Props) {
           {/* Fun flavor text */}
           <div className="text-center py-4 border-t border-white/5">
             <p className="text-sm text-text-muted italic">
-              "Any sufficiently advanced codebase is indistinguishable from
-              magic."
+              "Any sufficiently advanced codebase is indistinguishable from magic."
             </p>
             <p className="text-xs text-text-muted mt-2">
               You wrote {formatNumber(resources.totalLoCEarned)} lines of code.
               <br />
-              That's roughly {formatNumber(resources.totalLoCEarned / 50)}{" "}
-              novels worth of text.
+              That's roughly {formatNumber(resources.totalLoCEarned / 50)} novels worth of text.
             </p>
           </div>
         </div>
 
         {/* Footer */}
         <div className="px-8 py-4 border-t border-white/5 flex items-center justify-between">
-          <p className="text-xs text-text-muted">
-            CodeClicker - You beat the game! 🎮
-          </p>
+          <p className="text-xs text-text-muted">CodeClicker - You beat the game! 🎮</p>
           <button
             type="button"
             onClick={onClose}
@@ -202,22 +132,14 @@ export function VictoryModal({ open, onClose }: Props) {
   );
 }
 
-function StatCard({
-  label,
-  value,
-  icon,
-}: { label: string; value: string; icon: string }) {
+function StatCard({ label, value, icon }: { label: string; value: string; icon: string }) {
   return (
     <div className="p-3 rounded-lg bg-bg-card/60 border border-white/5">
       <div className="flex items-center gap-1.5 mb-1">
         <span className="text-sm">{icon}</span>
-        <span className="text-[10px] text-text-muted uppercase tracking-wider">
-          {label}
-        </span>
+        <span className="text-[10px] text-text-muted uppercase tracking-wider">{label}</span>
       </div>
-      <div className="font-mono text-sm text-text-primary font-semibold">
-        {value}
-      </div>
+      <div className="font-mono text-sm text-text-primary font-semibold">{value}</div>
     </div>
   );
 }

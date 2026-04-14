@@ -143,15 +143,10 @@ export const PRESTIGE_UPGRADES: PrestigeUpgradeDefinition[] = [
 export const BASE_PRESTIGE_THRESHOLD = 1_000_000;
 
 export function getPrestigeThreshold(prestigeUpgrades: string[]): number {
-  return prestigeUpgrades.includes("tech_empire")
-    ? 500_000
-    : BASE_PRESTIGE_THRESHOLD;
+  return prestigeUpgrades.includes("tech_empire") ? 500_000 : BASE_PRESTIGE_THRESHOLD;
 }
 
-export function calculateReputationEarned(
-  totalLoCEarned: number,
-  hasReputationBoost: boolean,
-): number {
+export function calculateReputationEarned(totalLoCEarned: number, hasReputationBoost: boolean): number {
   // Logarithmic scaling: each doubling of LoC adds ~1.5 rep
   // 1M=1, 8M=5, 64M=10, 500M=14, 5B=19, 50B=24, 500B=29
   const ratio = Math.max(1, totalLoCEarned / BASE_PRESTIGE_THRESHOLD);

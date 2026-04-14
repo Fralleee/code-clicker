@@ -40,9 +40,7 @@ export function StatsPanel() {
     <div className="flex flex-col h-full p-3">
       {/* Stats - fixed at top */}
       <div className="shrink-0">
-        <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
-          Stats
-        </h3>
+        <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Stats</h3>
         <div className="space-y-1.5 text-xs">
           <StatRow label="Total LoC" value={formatNumber(totalLoc)} />
           <StatRow label="LoC/sec" value={formatNumber(locPerSec)} />
@@ -55,10 +53,7 @@ export function StatsPanel() {
               <div className="border-t border-white/5 pt-1.5 mt-1.5" />
               <StatRow label="Times Shipped" value={timesShipped.toString()} />
               <StatRow label="Reputation" value={formatNumber(reputation)} />
-              <StatRow
-                label="Prestige Bonus"
-                value={`+${Math.round((prestigeMult - 1) * 100)}%`}
-              />
+              <StatRow label="Prestige Bonus" value={`+${Math.round((prestigeMult - 1) * 100)}%`} />
             </>
           )}
         </div>
@@ -67,9 +62,7 @@ export function StatsPanel() {
       {/* Hacks - below stats */}
       {showHacks && (
         <div className="shrink-0 border-t border-white/5 pt-3 mt-3">
-          <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
-            Hacks
-          </h3>
+          <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Hacks</h3>
           <HackPanel />
         </div>
       )}

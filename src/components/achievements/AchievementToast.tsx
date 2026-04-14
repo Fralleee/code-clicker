@@ -16,10 +16,7 @@ export function useAchievementToasts() {
   const showToast = useCallback((achievementId: string, name: string) => {
     const ach = ACHIEVEMENTS.find((a) => a.id === achievementId);
     const key = nextKey++;
-    setToasts((prev) => [
-      ...prev,
-      { id: achievementId, name, icon: ach?.icon ?? "🏆", key },
-    ]);
+    setToasts((prev) => [...prev, { id: achievementId, name, icon: ach?.icon ?? "🏆", key }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.key !== key));
     }, 4000);
@@ -53,16 +50,12 @@ function AchievementToastItem({ toast }: { toast: ToastItem }) {
   return (
     <div
       className={`flex items-center gap-3 px-4 py-3 rounded-lg bg-bg-card border border-accent-gold/30 shadow-lg ${
-        exiting
-          ? "animate-[slide-out-right_0.5s_ease-in_forwards]"
-          : "animate-[slide-in-right_0.3s_ease-out]"
+        exiting ? "animate-[slide-out-right_0.5s_ease-in_forwards]" : "animate-[slide-in-right_0.3s_ease-out]"
       }`}
     >
       <span className="text-2xl">{toast.icon}</span>
       <div>
-        <div className="text-xs text-accent-gold font-semibold">
-          Achievement Unlocked!
-        </div>
+        <div className="text-xs text-accent-gold font-semibold">Achievement Unlocked!</div>
         <div className="text-sm text-text-primary">{toast.name}</div>
       </div>
     </div>

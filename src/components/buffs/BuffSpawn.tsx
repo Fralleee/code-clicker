@@ -31,9 +31,7 @@ export function BuffSpawnLayer() {
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const scheduleSpawn = useCallback(() => {
-    const delay =
-      MIN_SPAWN_INTERVAL +
-      Math.random() * (MAX_SPAWN_INTERVAL - MIN_SPAWN_INTERVAL);
+    const delay = MIN_SPAWN_INTERVAL + Math.random() * (MAX_SPAWN_INTERVAL - MIN_SPAWN_INTERVAL);
     timerRef.current = setTimeout(() => {
       const buff = pickRandomBuff();
       // Random position within the viewport, with padding
@@ -43,9 +41,7 @@ export function BuffSpawnLayer() {
 
       // Auto-despawn after SPAWN_DURATION
       setTimeout(() => {
-        setSpawned((curr) =>
-          curr?.spawnedAt === Date.now() - SPAWN_DURATION ? null : curr,
-        );
+        setSpawned((curr) => (curr?.spawnedAt === Date.now() - SPAWN_DURATION ? null : curr));
       }, SPAWN_DURATION);
 
       scheduleSpawn();
@@ -116,13 +112,7 @@ export function BuffSpawnLayer() {
   return (
     <>
       {/* Spawned clickable buff */}
-      {spawned && (
-        <SpawnedBuffButton
-          key={spawned.key}
-          spawned={spawned}
-          onClick={() => handleClick(spawned)}
-        />
-      )}
+      {spawned && <SpawnedBuffButton key={spawned.key} spawned={spawned} onClick={() => handleClick(spawned)} />}
 
       {/* Buff messages */}
       <div className="fixed top-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-50 pointer-events-none">
@@ -145,13 +135,7 @@ export function BuffSpawnLayer() {
   );
 }
 
-function SpawnedBuffButton({
-  spawned,
-  onClick,
-}: {
-  spawned: SpawnedBuff;
-  onClick: () => void;
-}) {
+function SpawnedBuffButton({ spawned, onClick }: { spawned: SpawnedBuff; onClick: () => void }) {
   const [opacity, setOpacity] = useState(1);
 
   useEffect(() => {
@@ -164,11 +148,9 @@ function SpawnedBuffButton({
   }, [spawned.spawnedAt]);
 
   const rarityStyles = {
-    common:
-      "from-cyan-500/30 to-cyan-600/30 border-accent-cyan/50 shadow-[0_0_20px_rgba(0,212,255,0.3)]",
+    common: "from-cyan-500/30 to-cyan-600/30 border-accent-cyan/50 shadow-[0_0_20px_rgba(0,212,255,0.3)]",
     rare: "from-purple-500/30 to-purple-600/30 border-accent-purple/50 shadow-[0_0_20px_rgba(168,85,247,0.3)]",
-    legendary:
-      "from-yellow-500/30 to-yellow-600/30 border-accent-gold/50 shadow-[0_0_25px_rgba(255,215,0,0.4)]",
+    legendary: "from-yellow-500/30 to-yellow-600/30 border-accent-gold/50 shadow-[0_0_25px_rgba(255,215,0,0.4)]",
   };
 
   return (

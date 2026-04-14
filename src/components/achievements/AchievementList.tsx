@@ -21,16 +21,10 @@ export function AchievementList() {
           >
             <span className="text-base">{isUnlocked ? ach.icon : "🔒"}</span>
             <div className="min-w-0">
-              <div
-                className={`font-medium truncate ${
-                  isUnlocked ? "text-text-primary" : "text-text-muted"
-                }`}
-              >
+              <div className={`font-medium truncate ${isUnlocked ? "text-text-primary" : "text-text-muted"}`}>
                 {isUnlocked ? ach.name : "???"}
               </div>
-              <div className="text-text-muted truncate">
-                {isUnlocked ? ach.description : "Keep playing..."}
-              </div>
+              <div className="text-text-muted truncate">{isUnlocked ? ach.description : "Keep playing..."}</div>
             </div>
             {isUnlocked && ach.reward && (
               <span className="shrink-0 text-accent-gold text-[10px]">

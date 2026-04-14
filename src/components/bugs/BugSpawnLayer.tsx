@@ -1,16 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { BugDefinition } from "../../data/bugs";
-import {
-  getBugSpawnInterval,
-  getMaxActiveBugs,
-  pickRandomBug,
-} from "../../data/bugs";
+import { getBugSpawnInterval, getMaxActiveBugs, pickRandomBug } from "../../data/bugs";
 import { useGameStore } from "../../store/gameStore";
-import {
-  selectIsBugImmune,
-  selectLocPerSecond,
-  selectRawLocPerSecond,
-} from "../../store/selectors";
+import { selectIsBugImmune, selectLocPerSecond, selectRawLocPerSecond } from "../../store/selectors";
 
 interface SpawnedBug {
   key: number;
@@ -35,6 +27,8 @@ export function BugSpawnLayer() {
   const td = useGameStore((s) => s.resources.techDebt);
 
   const scheduleSpawn = useCallback(() => {
+    // Reference td to trigger re-scheduling when debt changes
+    void td;
     const state = useGameStore.getState();
     const rawLoC = selectRawLocPerSecond(state);
     const currentTd = state.resources.techDebt ?? 0;
@@ -64,7 +58,7 @@ export function BugSpawnLayer() {
 
       scheduleSpawn();
     }, delay);
-  }, [td]); // eslint-disable-line -- td triggers re-scheduling
+  }, [td]);
 
   useEffect(() => {
     scheduleSpawn();
@@ -101,10 +95,7 @@ export function BugSpawnLayer() {
     const reward = Math.max(0, locPerSec * target.bug.fixRewardSeconds);
     if (reward > 0) state.addLoC(reward);
 
-    const tdReduction = Math.max(
-      5,
-      (state.resources.techDebt ?? 0) * target.bug.fixTdReductionPercent,
-    );
+    const tdReduction = Math.max(5, (state.resources.techDebt ?? 0) * target.bug.fixTdReductionPercent);
     state.reduceTechDebt(tdReduction);
 
     const msgKey = bugKey++;
@@ -122,10 +113,7 @@ export function BugSpawnLayer() {
         isPositive: true,
       },
     ]);
-    setTimeout(
-      () => setMessages((prev) => prev.filter((m) => m.key !== msgKey)),
-      3000,
-    );
+    setTimeout(() => setMessages((prev) => prev.filter((m) => m.key !== msgKey)), 3000);
 
     setBugs((current) => current.filter((b) => b.key !== target.key));
   }, []);
@@ -153,10 +141,7 @@ export function BugSpawnLayer() {
   );
 }
 
-function applyMissPenalty(
-  b: SpawnedBug,
-  setMessages: React.Dispatch<React.SetStateAction<BugMessage[]>>,
-) {
+function applyMissPenalty(b: SpawnedBug, setMessages: React.Dispatch<React.SetStateAction<BugMessage[]>>) {
   const state = useGameStore.getState();
   const locPerSec = selectLocPerSecond(state);
   const penalty = Math.max(0, locPerSec * b.bug.missPenaltySeconds);
@@ -206,19 +191,10 @@ function applyMissPenalty(
       isPositive: false,
     },
   ]);
-  setTimeout(
-    () => setMessages((prev) => prev.filter((m) => m.key !== msgKey)),
-    4000,
-  );
+  setTimeout(() => setMessages((prev) => prev.filter((m) => m.key !== msgKey)), 4000);
 }
 
-function BugOrb({
-  spawned,
-  onClick,
-}: {
-  spawned: SpawnedBug;
-  onClick: () => void;
-}) {
+function BugOrb({ spawned, onClick }: { spawned: SpawnedBug; onClick: () => void }) {
   const [opacity, setOpacity] = useState(1);
 
   useEffect(() => {
@@ -232,11 +208,7 @@ function BugOrb({
   const sev = spawned.bug.severity;
 
   const sizeClass =
-    sev === "critical"
-      ? "w-16 h-16 text-3xl"
-      : sev === "major"
-        ? "w-14 h-14 text-2xl"
-        : "w-12 h-12 text-xl";
+    sev === "critical" ? "w-16 h-16 text-3xl" : sev === "major" ? "w-14 h-14 text-2xl" : "w-12 h-12 text-xl";
 
   const borderClass =
     sev === "critical"

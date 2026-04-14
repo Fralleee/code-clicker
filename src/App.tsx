@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  AchievementToastLayer,
-  useAchievementToasts,
-} from "./components/achievements/AchievementToast";
+import { AchievementToastLayer, useAchievementToasts } from "./components/achievements/AchievementToast";
 import { ActiveBuffBar } from "./components/buffs/ActiveBuffBar";
 import { BuffSpawnLayer } from "./components/buffs/BuffSpawn";
 import { BugSpawnLayer } from "./components/bugs/BugSpawnLayer";
@@ -14,10 +11,7 @@ import { TopBar } from "./components/layout/TopBar";
 import { PrestigeModal } from "./components/prestige/PrestigeModal";
 import { ShopPanel } from "./components/shop/ShopPanel";
 import { VictoryModal } from "./components/victory/VictoryModal";
-import {
-  setAchievementCallback,
-  useAchievementChecker,
-} from "./hooks/useAchievementChecker";
+import { setAchievementCallback, useAchievementChecker } from "./hooks/useAchievementChecker";
 import { useAutoSave } from "./hooks/useAutoSave";
 import { useGameLoop } from "./hooks/useGameLoop";
 import { useGameStore } from "./store/gameStore";
@@ -34,8 +28,7 @@ export default function App() {
   // Load saved game on mount
   useEffect(() => {
     useGameStore.getState().loadGame();
-    prevTimesShipped.current =
-      useGameStore.getState().prestige.timesShipped;
+    prevTimesShipped.current = useGameStore.getState().prestige.timesShipped;
   }, []);
 
   // Set up achievement callback
@@ -70,10 +63,7 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen bg-bg-deep">
-      <TopBar
-        onPrestigeClick={() => setPrestigeOpen(true)}
-        onHelpClick={() => setHelpOpen(true)}
-      />
+      <TopBar onPrestigeClick={() => setPrestigeOpen(true)} onHelpClick={() => setHelpOpen(true)} />
       <ActiveBuffBar />
 
       <div className="flex flex-1 min-h-0">
@@ -96,10 +86,7 @@ export default function App() {
       </div>
 
       {/* Modals & overlays */}
-      <PrestigeModal
-        open={prestigeOpen}
-        onClose={() => setPrestigeOpen(false)}
-      />
+      <PrestigeModal open={prestigeOpen} onClose={() => setPrestigeOpen(false)} />
       <HelpDrawer open={helpOpen} onOpenChange={setHelpOpen} />
       <VictoryModal
         open={victoryOpen}

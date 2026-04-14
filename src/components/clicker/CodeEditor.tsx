@@ -17,7 +17,7 @@ export function CodeEditor() {
     { id: 1, text: "// Click here to write code..." },
   ]);
   const [isBouncing, setIsBouncing] = useState(false);
-  const editorRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<HTMLButtonElement>(null);
   const linesEndRef = useRef<HTMLDivElement>(null);
   const { floats, addFloat } = useClickFeedback();
 
@@ -47,17 +47,13 @@ export function CodeEditor() {
   );
 
   return (
-    <div
+    <button
+      type="button"
       ref={editorRef}
-      className={`relative rounded-xl overflow-hidden border border-white/10 transition-transform select-none cursor-pointer h-full flex flex-col ${
+      className={`relative w-full rounded-xl overflow-hidden border border-white/10 transition-transform select-none cursor-pointer h-full flex flex-col text-left appearance-none bg-transparent p-0 ${
         isBouncing ? "scale-[1.02]" : "scale-100"
       }`}
       onClick={handleClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") handleClick(e as unknown as React.MouseEvent);
-      }}
-      role="button"
-      tabIndex={0}
     >
       {/* Title bar */}
       <div className="flex items-center gap-2 px-4 py-2 bg-bg-editor-bar">
@@ -81,6 +77,6 @@ export function CodeEditor() {
       </div>
 
       <ClickFeedbackLayer floats={floats} />
-    </div>
+    </button>
   );
 }

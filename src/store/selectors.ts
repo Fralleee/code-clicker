@@ -212,7 +212,7 @@ export function selectNetTechDebtPerSecond(state: GameState): number {
 
 // === Building Production ===
 
-/** Mastery: 500 count + all building_boost upgrades purchased = 10x */
+/** Mastery: 500 count + all standard tier upgrades purchased = 100x */
 export function selectBuildingMastery(state: GameState, buildingId: string): boolean {
   const owned = state.buildings.find((b) => b.id === buildingId);
   if (!owned || owned.count < 500) return false;
@@ -230,7 +230,7 @@ export function selectBuildingProduction(state: GameState, buildingId: string): 
   const owned = state.buildings.find((b) => b.id === buildingId);
   if (!def || !owned || owned.count === 0) return 0;
 
-  const masteryBonus = selectBuildingMastery(state, buildingId) ? 10 : 1;
+  const masteryBonus = selectBuildingMastery(state, buildingId) ? 100 : 1;
 
   return (
     owned.count *

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BUILDINGS } from "../data/buildings";
+import { getStandardUpgradeIds } from "../data/standardUpgrades";
 import {
   selectBuildingMastery,
   selectBuildingMultiplier,
@@ -184,6 +185,16 @@ describe("selectNetTechDebtPerSecond", () => {
     expect(selectNetTechDebtPerSecond(state)).toBeLessThan(0);
   });
 
+  it("cleaner upgrades increase TD cleanup", () => {
+    const base = withBuildings(createTestState(), { senior_dev: 10 });
+    const upgraded = {
+      ...base,
+      purchasedUpgrades: ["senior_dev_1"],
+    };
+
+    expect(selectNetTechDebtPerSecond(upgraded)).toBeLessThan(selectNetTechDebtPerSecond(base) * 2);
+  });
+
   it("mixed buildings can balance out", () => {
     const state = withBuildings(createTestState(), {
       intern: 10,
@@ -248,8 +259,8 @@ describe("selectBuildingMastery", () => {
     expect(selectBuildingMastery(state, "intern")).toBe(false);
   });
 
-  it("returns true with 500 count + all 13 tiers", () => {
-    const upgrades = Array.from({ length: 13 }, (_, i) => `intern_${i + 1}`);
+  it("returns true with 500 count + all standard tiers", () => {
+    const upgrades = getStandardUpgradeIds("intern");
     let state = withBuildings(createTestState(), { intern: 500 });
     state = { ...state, purchasedUpgrades: upgrades };
     expect(selectBuildingMastery(state, "intern")).toBe(true);
@@ -266,9 +277,7 @@ describe("selectHasWon", () => {
     const upgrades: string[] = [];
     for (const b of BUILDINGS) {
       counts[b.id] = 500;
-      for (let t = 1; t <= 13; t++) {
-        upgrades.push(`${b.id}_${t}`);
-      }
+      upgrades.push(...getStandardUpgradeIds(b.id));
     }
     let state = withBuildings(createTestState(), counts);
     state = { ...state, purchasedUpgrades: upgrades };

@@ -1,0 +1,51 @@
+export const STANDARD_BUILDING_UPGRADE_LEVELS = [
+  10,
+  25,
+  50,
+  75,
+  100,
+  125,
+  150,
+  175,
+  200,
+  225,
+  250,
+  275,
+  300,
+  325,
+  350,
+  375,
+  400,
+  425,
+  450,
+  475,
+  500,
+] as const;
+
+export const STANDARD_BUILDING_UPGRADE_TIERS = [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+] as const;
+
+export function getStandardUpgradeIds(buildingId: string): string[] {
+  return STANDARD_BUILDING_UPGRADE_TIERS.map((tier) => `${buildingId}_${tier}`);
+}

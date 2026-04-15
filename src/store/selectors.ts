@@ -212,7 +212,7 @@ export function selectNetTechDebtPerSecond(state: GameState): number {
 
 // === Building Production ===
 
-/** Mastery: 500 count + all standard tier upgrades purchased = 100x */
+/** Mastery: 500 count + all standard tier upgrades purchased → mirrors highest building production */
 export function selectBuildingMastery(state: GameState, buildingId: string): boolean {
   const owned = state.buildings.find((b) => b.id === buildingId);
   if (!owned || owned.count < 500) return false;
@@ -225,12 +225,10 @@ export function selectBuildingMastery(state: GameState, buildingId: string): boo
   return true;
 }
 
-export function selectBuildingProduction(state: GameState, buildingId: string): number {
+function selectBuildingProductionBeforeMastery(state: GameState, buildingId: string): number {
   const def = BUILDINGS.find((b) => b.id === buildingId);
   const owned = state.buildings.find((b) => b.id === buildingId);
   if (!def || !owned || owned.count === 0) return 0;
-
-  const masteryBonus = selectBuildingMastery(state, buildingId) ? 100 : 1;
 
   return (
     owned.count *
@@ -242,9 +240,28 @@ export function selectBuildingProduction(state: GameState, buildingId: string): 
     selectAngelInvestorBonus(state) *
     selectActiveBuffProductionMultiplier(state) *
     selectPrestigeProductionBonus(state) *
-    selectTechDebtMultiplier(state) *
-    masteryBonus
+    selectTechDebtMultiplier(state)
   );
+}
+
+function selectHighestProductionBeforeMastery(state: GameState): number {
+  let max = 0;
+  for (const def of BUILDINGS) {
+    const prod = selectBuildingProductionBeforeMastery(state, def.id);
+    if (prod > max) max = prod;
+  }
+  return max;
+}
+
+export function selectBuildingProduction(state: GameState, buildingId: string): number {
+  const base = selectBuildingProductionBeforeMastery(state, buildingId);
+  if (base === 0) return 0;
+
+  if (selectBuildingMastery(state, buildingId)) {
+    return selectHighestProductionBeforeMastery(state);
+  }
+
+  return base;
 }
 
 export function selectLocPerSecond(state: GameState): number {

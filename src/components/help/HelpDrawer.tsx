@@ -182,8 +182,12 @@ export function HelpDrawer({ open, onOpenChange }: Props) {
             <Section title="Mastery & Victory" icon="👑">
               <p>
                 When a building reaches <strong>500 count</strong> with all {STANDARD_BUILDING_UPGRADE_LEVELS.length}{" "}
-                standard upgrade tiers purchased, it achieves <strong className="text-accent-green">Mastery</strong> --
-                a permanent <strong>10x</strong> production bonus shown as a green badge.
+                standard upgrade tiers purchased, it achieves <strong className="text-accent-green">Mastery</strong>{" "}
+                shown as a green <strong>10x</strong> badge.
+              </p>
+              <p className="mt-2">
+                Mastered buildings <strong>mirror the production of your highest-producing building</strong>. Invest
+                heavily in one building and every mastered building matches its output!
               </p>
               <p className="mt-2">
                 <strong>Master all 12 buildings</strong> to beat the game and see the Victory screen with your final

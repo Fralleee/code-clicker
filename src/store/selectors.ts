@@ -177,10 +177,10 @@ function selectCleanerUpgradeBonus(state: GameState, buildingId: string): number
   const def = BUILDINGS.find((building) => building.id === buildingId);
   if (!def || def.techDebtRatio >= 0) return 1;
 
+  const standardIds = getStandardUpgradeIds(buildingId);
   let buildingBoosts = 0;
-  for (const upId of state.purchasedUpgrades) {
-    const upgrade = UPGRADES.find((u) => u.id === upId);
-    if (upgrade?.effect.kind === "building_boost" && upgrade.effect.buildingId === buildingId) {
+  for (const id of standardIds) {
+    if (state.purchasedUpgrades.includes(id)) {
       buildingBoosts += 1;
     }
   }

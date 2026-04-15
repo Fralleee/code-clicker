@@ -244,12 +244,16 @@ function selectBuildingProductionBeforeMastery(state: GameState, buildingId: str
   );
 }
 
+let _highestCache: { state: GameState; value: number } | null = null;
+
 function selectHighestProductionBeforeMastery(state: GameState): number {
+  if (_highestCache && _highestCache.state === state) return _highestCache.value;
   let max = 0;
   for (const def of BUILDINGS) {
     const prod = selectBuildingProductionBeforeMastery(state, def.id);
     if (prod > max) max = prod;
   }
+  _highestCache = { state, value: max };
   return max;
 }
 

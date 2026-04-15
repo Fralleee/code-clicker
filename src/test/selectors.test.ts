@@ -266,18 +266,21 @@ describe("selectBuildingMastery", () => {
     expect(selectBuildingMastery(state, "intern")).toBe(true);
   });
 
-  it("mastery applies 100x production bonus", () => {
-    const upgrades = getStandardUpgradeIds("intern");
-    let base = withBuildings(createTestState(), { intern: 500 });
-    const withoutMastery = selectBuildingProduction(base, "intern");
+  it("mastery mirrors highest building production", () => {
+    // Both buildings mastered (500 count + all upgrades)
+    // Intern baseProduction=0.2, Junior Dev baseProduction=8 (40x higher)
+    // Both mastered → both should produce the same (mirroring the highest)
+    const internUpgrades = getStandardUpgradeIds("intern");
+    const juniorUpgrades = getStandardUpgradeIds("junior_dev");
+    let state = withBuildings(createTestState(), { intern: 500, junior_dev: 500 });
+    state = { ...state, purchasedUpgrades: [...internUpgrades, ...juniorUpgrades] };
 
-    base = { ...base, purchasedUpgrades: upgrades };
-    const withMastery = selectBuildingProduction(base, "intern");
+    const internProd = selectBuildingProduction(state, "intern");
+    const juniorProd = selectBuildingProduction(state, "junior_dev");
 
-    // Mastery adds 100x on top of upgrade multipliers, so the ratio
-    // between mastered and non-mastered (ignoring upgrade multipliers
-    // which also change) should include the 100x factor.
-    expect(withMastery).toBeGreaterThan(withoutMastery * 50);
+    // Both mastered → both mirror the highest base production (junior dev's)
+    expect(internProd).toBe(juniorProd);
+    expect(internProd).toBeGreaterThan(0);
   });
 });
 

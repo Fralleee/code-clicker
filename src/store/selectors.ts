@@ -268,12 +268,7 @@ function selectBuildingProductionBeforeMastery(state: GameState, buildingId: str
 }
 
 /** Internal: production with pre-computed shared multipliers (avoids recomputing per building) */
-function buildingProductionWithShared(
-  state: GameState,
-  buildingId: string,
-  shared: number,
-  tdMult: number,
-): number {
+function buildingProductionWithShared(state: GameState, buildingId: string, shared: number, tdMult: number): number {
   const def = BUILDING_BY_ID.get(buildingId);
   const owned = state.buildings.find((b) => b.id === buildingId);
   if (!def || !owned || owned.count === 0) return 0;

@@ -13,6 +13,19 @@ import { getStandardUpgradeIds } from "../data/standardUpgrades";
 import { UPGRADES } from "../data/upgrades";
 import type { GameState } from "../types/game";
 
+// === Purchased Upgrades Set (O(1) lookups, memoized per state) ===
+
+let _upgradeSetCache: { upgrades: string[]; set: Set<string> } | null = null;
+
+function getPurchasedSet(state: GameState): Set<string> {
+  if (_upgradeSetCache && _upgradeSetCache.upgrades === state.purchasedUpgrades) {
+    return _upgradeSetCache.set;
+  }
+  const set = new Set(state.purchasedUpgrades);
+  _upgradeSetCache = { upgrades: state.purchasedUpgrades, set };
+  return set;
+}
+
 // === Prestige Multipliers ===
 
 export function selectPrestigeMultiplier(state: GameState): number {
@@ -80,7 +93,7 @@ export function selectAchievementClickBonus(state: GameState): number {
 export function selectBuildingMultiplier(state: GameState, buildingId: string): number {
   let multiplier = 1;
   for (const boost of BUILDING_BOOST_UPGRADES.get(buildingId) ?? []) {
-    if (state.purchasedUpgrades.includes(boost.id)) {
+    if (getPurchasedSet(state).has(boost.id)) {
       multiplier *= boost.multiplier;
     }
   }
@@ -90,7 +103,7 @@ export function selectBuildingMultiplier(state: GameState, buildingId: string): 
 export function selectGlobalProductionMultiplier(state: GameState): number {
   let multiplier = 1;
   for (const up of GLOBAL_PRODUCTION_UPGRADES) {
-    if (state.purchasedUpgrades.includes(up.id)) {
+    if (getPurchasedSet(state).has(up.id)) {
       multiplier *= up.multiplier;
     }
   }
@@ -189,7 +202,7 @@ export function selectTechDebtMultiplier(state: GameState): number {
 function selectTdReduction(state: GameState, buildingId: string): number {
   let reduction = 1;
   for (const up of TD_REDUCTION_UPGRADES.get(buildingId) ?? []) {
-    if (state.purchasedUpgrades.includes(up.id)) {
+    if (getPurchasedSet(state).has(up.id)) {
       reduction *= 1 - up.reduction;
     }
   }
@@ -202,7 +215,7 @@ function selectCleanerUpgradeBonus(state: GameState, buildingId: string, techDeb
   const standardIds = getStandardUpgradeIds(buildingId);
   let buildingBoosts = 0;
   for (const id of standardIds) {
-    if (state.purchasedUpgrades.includes(id)) {
+    if (getPurchasedSet(state).has(id)) {
       buildingBoosts += 1;
     }
   }
@@ -241,7 +254,7 @@ export function selectBuildingMastery(state: GameState, buildingId: string): boo
   if (!owned || owned.count < 500) return false;
   // Only check standard tier upgrades, not cross-building, early, or td_reduction upgrades.
   for (const upgradeId of getStandardUpgradeIds(buildingId)) {
-    if (!state.purchasedUpgrades.includes(upgradeId)) {
+    if (!getPurchasedSet(state).has(upgradeId)) {
       return false;
     }
   }
@@ -249,22 +262,9 @@ export function selectBuildingMastery(state: GameState, buildingId: string): boo
 }
 
 function selectBuildingProductionBeforeMastery(state: GameState, buildingId: string): number {
-  const def = BUILDING_BY_ID.get(buildingId);
-  const owned = state.buildings.find((b) => b.id === buildingId);
-  if (!def || !owned || owned.count === 0) return 0;
-
-  return (
-    owned.count *
-    def.baseProduction *
-    selectBuildingMultiplier(state, buildingId) *
-    selectGlobalProductionMultiplier(state) *
-    selectPrestigeMultiplier(state) *
-    selectAchievementProductionBonus(state) *
-    selectAngelInvestorBonus(state) *
-    selectActiveBuffProductionMultiplier(state) *
-    selectPrestigeProductionBonus(state) *
-    selectTechDebtMultiplier(state)
-  );
+  const shared = sharedMultiplierProduct(computeSharedMultipliers(state));
+  const tdMult = selectTechDebtMultiplier(state);
+  return buildingProductionWithShared(state, buildingId, shared, tdMult);
 }
 
 /** Internal: production with pre-computed shared multipliers (avoids recomputing per building) */
@@ -320,7 +320,7 @@ export function selectLocPerSecond(state: GameState): number {
 export function selectClickPowerMultiplier(state: GameState): number {
   let multiplier = 1;
   for (const up of CLICK_POWER_UPGRADES) {
-    if (state.purchasedUpgrades.includes(up.id)) {
+    if (getPurchasedSet(state).has(up.id)) {
       multiplier *= up.multiplier;
     }
   }
@@ -330,7 +330,7 @@ export function selectClickPowerMultiplier(state: GameState): number {
 export function selectCpsClickPercent(state: GameState): number {
   let percent = 0;
   for (const up of CPS_CLICK_UPGRADES) {
-    if (state.purchasedUpgrades.includes(up.id)) {
+    if (getPurchasedSet(state).has(up.id)) {
       percent += up.percent;
     }
   }
@@ -404,7 +404,7 @@ export function selectVisibleBuildings(state: GameState): VisibleBuilding[] {
 
 export function selectVisibleUpgrades(state: GameState) {
   return UPGRADES.filter((upgrade): boolean => {
-    if (state.purchasedUpgrades.includes(upgrade.id)) return false;
+    if (getPurchasedSet(state).has(upgrade.id)) return false;
     const cond = upgrade.unlockCondition;
     switch (cond.kind) {
       case "total_loc":

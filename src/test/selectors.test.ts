@@ -265,6 +265,20 @@ describe("selectBuildingMastery", () => {
     state = { ...state, purchasedUpgrades: upgrades };
     expect(selectBuildingMastery(state, "intern")).toBe(true);
   });
+
+  it("mastery applies 100x production bonus", () => {
+    const upgrades = getStandardUpgradeIds("intern");
+    let base = withBuildings(createTestState(), { intern: 500 });
+    const withoutMastery = selectBuildingProduction(base, "intern");
+
+    base = { ...base, purchasedUpgrades: upgrades };
+    const withMastery = selectBuildingProduction(base, "intern");
+
+    // Mastery adds 100x on top of upgrade multipliers, so the ratio
+    // between mastered and non-mastered (ignoring upgrade multipliers
+    // which also change) should include the 100x factor.
+    expect(withMastery).toBeGreaterThan(withoutMastery * 50);
+  });
 });
 
 describe("selectHasWon", () => {

@@ -1,4 +1,5 @@
 import { Drawer } from "vaul";
+import { STANDARD_BUILDING_UPGRADE_LEVELS } from "../../data/standardUpgrades";
 
 interface Props {
   open: boolean;
@@ -153,8 +154,8 @@ export function HelpDrawer({ open, onOpenChange }: Props) {
               <p>One-time LoC purchases that permanently boost production:</p>
               <ul className="list-disc list-inside space-y-1 mt-2">
                 <li>
-                  <strong>Building upgrades</strong> at counts 10, 25, 50, 75, 100, 125, 150, 175, 200, 250, 300, 400,
-                  500. Each gives 2x-5x production.
+                  <strong>Building upgrades</strong> at counts {STANDARD_BUILDING_UPGRADE_LEVELS.join(", ")}. Each gives
+                  2x-5x production.
                 </li>
                 <li>
                   <strong>Cross-building upgrades</strong> -- one building's count boosts another (e.g., "25 Senior
@@ -180,9 +181,9 @@ export function HelpDrawer({ open, onOpenChange }: Props) {
 
             <Section title="Mastery & Victory" icon="👑">
               <p>
-                When a building reaches <strong>500 count</strong> with all 13 standard upgrade tiers purchased, it
-                achieves <strong className="text-accent-green">Mastery</strong> -- a permanent <strong>10x</strong>{" "}
-                production bonus shown as a green badge.
+                When a building reaches <strong>500 count</strong> with all {STANDARD_BUILDING_UPGRADE_LEVELS.length}{" "}
+                standard upgrade tiers purchased, it achieves <strong className="text-accent-green">Mastery</strong> --
+                a permanent <strong>10x</strong> production bonus shown as a green badge.
               </p>
               <p className="mt-2">
                 <strong>Master all 12 buildings</strong> to beat the game and see the Victory screen with your final

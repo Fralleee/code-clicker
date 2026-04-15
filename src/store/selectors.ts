@@ -1,6 +1,7 @@
 import { ACHIEVEMENTS } from "../data/achievements";
 import { BUILDINGS } from "../data/buildings";
 import { BASE_PRESTIGE_THRESHOLD, getPrestigeThreshold } from "../data/prestige";
+import { getStandardUpgradeIds } from "../data/standardUpgrades";
 import { UPGRADES } from "../data/upgrades";
 import type { GameState } from "../types/game";
 
@@ -172,6 +173,20 @@ function selectTdReduction(state: GameState, buildingId: string): number {
   return reduction;
 }
 
+function selectCleanerUpgradeBonus(state: GameState, buildingId: string, techDebtRatio: number): number {
+  if (techDebtRatio >= 0) return 1;
+
+  const standardIds = getStandardUpgradeIds(buildingId);
+  let buildingBoosts = 0;
+  for (const id of standardIds) {
+    if (state.purchasedUpgrades.includes(id)) {
+      buildingBoosts += 1;
+    }
+  }
+
+  return 1 + buildingBoosts * 0.1;
+}
+
 export function selectNetTechDebtPerSecond(state: GameState): number {
   let total = 0;
   for (const def of BUILDINGS) {
@@ -182,6 +197,8 @@ export function selectNetTechDebtPerSecond(state: GameState): number {
     // TD reduction upgrades only apply to positive (debt-generating) buildings
     if (tdRate > 0) {
       tdRate *= selectTdReduction(state, def.id);
+    } else if (tdRate < 0) {
+      tdRate *= selectCleanerUpgradeBonus(state, def.id, def.techDebtRatio);
     }
     total += tdRate;
   }
@@ -195,14 +212,13 @@ export function selectNetTechDebtPerSecond(state: GameState): number {
 
 // === Building Production ===
 
-/** Mastery: 500 count + all building_boost upgrades purchased = 10x */
+/** Mastery: 500 count + all standard tier upgrades purchased = 100x */
 export function selectBuildingMastery(state: GameState, buildingId: string): boolean {
   const owned = state.buildings.find((b) => b.id === buildingId);
   if (!owned || owned.count < 500) return false;
-  // Only check standard tier upgrades (buildingId_1 through buildingId_13)
-  // Not cross-building (xb_), code quality (cq_), early, or td_reduction upgrades
-  for (let tier = 1; tier <= 13; tier++) {
-    if (!state.purchasedUpgrades.includes(`${buildingId}_${tier}`)) {
+  // Only check standard tier upgrades, not cross-building, early, or td_reduction upgrades.
+  for (const upgradeId of getStandardUpgradeIds(buildingId)) {
+    if (!state.purchasedUpgrades.includes(upgradeId)) {
       return false;
     }
   }
@@ -214,7 +230,7 @@ export function selectBuildingProduction(state: GameState, buildingId: string): 
   const owned = state.buildings.find((b) => b.id === buildingId);
   if (!def || !owned || owned.count === 0) return 0;
 
-  const masteryBonus = selectBuildingMastery(state, buildingId) ? 10 : 1;
+  const masteryBonus = selectBuildingMastery(state, buildingId) ? 100 : 1;
 
   return (
     owned.count *

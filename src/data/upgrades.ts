@@ -1,4 +1,88 @@
 import type { UpgradeDefinition } from "../types/game";
+import { BUILDINGS } from "./buildings";
+
+const EXTRA_STANDARD_BUILDING_UPGRADES: UpgradeDefinition[] = BUILDINGS.flatMap((building) => [
+  {
+    id: `${building.id}_14`,
+    name: `${building.name} Milestone 225`,
+    description: `Unlocks 3x ${building.name} production.`,
+    cost: building.baseCost * 5_000_000,
+    unlockCondition: { kind: "building_count", buildingId: building.id, count: 225 },
+    effect: { kind: "building_boost", buildingId: building.id, multiplier: 3 },
+    icon: "🧩",
+    tier: 14,
+  },
+  {
+    id: `${building.id}_15`,
+    name: `${building.name} Milestone 275`,
+    description: `Unlocks 3x ${building.name} production.`,
+    cost: building.baseCost * 40_000_000,
+    unlockCondition: { kind: "building_count", buildingId: building.id, count: 275 },
+    effect: { kind: "building_boost", buildingId: building.id, multiplier: 3 },
+    icon: "🛠️",
+    tier: 15,
+  },
+  {
+    id: `${building.id}_16`,
+    name: `${building.name} Milestone 325`,
+    description: `Unlocks 3x ${building.name} production.`,
+    cost: building.baseCost * 200_000_000,
+    unlockCondition: { kind: "building_count", buildingId: building.id, count: 325 },
+    effect: { kind: "building_boost", buildingId: building.id, multiplier: 3 },
+    icon: "🏢",
+    tier: 16,
+  },
+  {
+    id: `${building.id}_17`,
+    name: `${building.name} Milestone 350`,
+    description: `Unlocks 3x ${building.name} production.`,
+    cost: building.baseCost * 400_000_000,
+    unlockCondition: { kind: "building_count", buildingId: building.id, count: 350 },
+    effect: { kind: "building_boost", buildingId: building.id, multiplier: 3 },
+    icon: "🌍",
+    tier: 17,
+  },
+  {
+    id: `${building.id}_18`,
+    name: `${building.name} Milestone 375`,
+    description: `Unlocks 5x ${building.name} production.`,
+    cost: building.baseCost * 700_000_000,
+    unlockCondition: { kind: "building_count", buildingId: building.id, count: 375 },
+    effect: { kind: "building_boost", buildingId: building.id, multiplier: 5 },
+    icon: "🤖",
+    tier: 18,
+  },
+  {
+    id: `${building.id}_19`,
+    name: `${building.name} Milestone 425`,
+    description: `Unlocks 5x ${building.name} production.`,
+    cost: building.baseCost * 2_500_000_000,
+    unlockCondition: { kind: "building_count", buildingId: building.id, count: 425 },
+    effect: { kind: "building_boost", buildingId: building.id, multiplier: 5 },
+    icon: "🛡️",
+    tier: 19,
+  },
+  {
+    id: `${building.id}_20`,
+    name: `${building.name} Milestone 450`,
+    description: `Unlocks 5x ${building.name} production.`,
+    cost: building.baseCost * 5_000_000_000,
+    unlockCondition: { kind: "building_count", buildingId: building.id, count: 450 },
+    effect: { kind: "building_boost", buildingId: building.id, multiplier: 5 },
+    icon: "📈",
+    tier: 20,
+  },
+  {
+    id: `${building.id}_21`,
+    name: `${building.name} Milestone 475`,
+    description: `Unlocks 5x ${building.name} production.`,
+    cost: building.baseCost * 7_500_000_000,
+    unlockCondition: { kind: "building_count", buildingId: building.id, count: 475 },
+    effect: { kind: "building_boost", buildingId: building.id, multiplier: 5 },
+    icon: "🌠",
+    tier: 21,
+  },
+]);
 
 export const UPGRADES: UpgradeDefinition[] = [
   // ═══ Click Power Upgrades (8) ═══
@@ -3058,4 +3142,5 @@ export const UPGRADES: UpgradeDefinition[] = [
     icon: "✨",
     tier: 13,
   },
+  ...EXTRA_STANDARD_BUILDING_UPGRADES,
 ];

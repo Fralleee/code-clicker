@@ -3,6 +3,7 @@ import { BUG_TYPES, getBugSpawnInterval, pickRandomBug } from "../data/bugs";
 import { BUILDINGS } from "../data/buildings";
 import { HACKS } from "../data/hacks";
 import { PRESTIGE_UPGRADES } from "../data/prestige";
+import { getStandardUpgradeIds } from "../data/standardUpgrades";
 import { UPGRADES } from "../data/upgrades";
 
 describe("buildings data", () => {
@@ -43,10 +44,9 @@ describe("upgrades data", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("every building has 13 standard tier upgrades", () => {
+  it("every building has all standard tier upgrades through 500", () => {
     for (const building of BUILDINGS) {
-      for (let tier = 1; tier <= 13; tier++) {
-        const id = `${building.id}_${tier}`;
+      for (const id of getStandardUpgradeIds(building.id)) {
         const found = UPGRADES.find((u) => u.id === id);
         expect(found, `Missing ${id}`).toBeDefined();
       }

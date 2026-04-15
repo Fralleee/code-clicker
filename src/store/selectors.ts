@@ -168,9 +168,8 @@ function getCachedSharedProduct(state: GameState): { shared: number; tdMult: num
   if (_sharedCache && _sharedCache.state === state) {
     return { shared: _sharedCache.product, tdMult: _sharedCache.tdMult };
   }
-  const m = computeSharedMultipliers(state);
-  const shared = sharedMultiplierProduct(m);
-  const tdMult = selectTechDebtMultiplier(state);
+  const shared = sharedMultiplierProduct(computeSharedMultipliers(state));
+  const tdMult = computeTechDebtMultiplier(state, shared);
   _sharedCache = { state, product: shared, tdMult };
   return { shared, tdMult };
 }
@@ -195,6 +194,10 @@ function sharedMultiplierProduct(m: SharedMultipliers): number {
 /** Raw LoC/s WITHOUT tech debt penalty (used to scale the TD penalty formula) */
 export function selectRawLocPerSecond(state: GameState): number {
   const shared = sharedMultiplierProduct(computeSharedMultipliers(state));
+  return rawLocPerSecondWithShared(state, shared);
+}
+
+function rawLocPerSecondWithShared(state: GameState, shared: number): number {
   let total = 0;
   for (const def of BUILDINGS) {
     const owned = state.buildings.find((b) => b.id === def.id);
@@ -205,10 +208,15 @@ export function selectRawLocPerSecond(state: GameState): number {
 }
 
 export function selectTechDebtMultiplier(state: GameState): number {
+  const shared = sharedMultiplierProduct(computeSharedMultipliers(state));
+  return computeTechDebtMultiplier(state, shared);
+}
+
+function computeTechDebtMultiplier(state: GameState, shared: number): number {
   const td = state.resources.techDebt ?? 0;
   if (td <= 0) return 1;
   // Divisor scales with production: ~15s of accumulated TD ≈ 50% penalty
-  const rawLocPerSec = selectRawLocPerSecond(state);
+  const rawLocPerSec = rawLocPerSecondWithShared(state, shared);
   const divisor = Math.max(1000, rawLocPerSec * 15);
   const penalty = 0.75 * (1 - Math.exp(-td / divisor));
   return Math.max(0.25, 1 - penalty);

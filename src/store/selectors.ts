@@ -162,6 +162,19 @@ interface SharedMultipliers {
   prestigeProd: number;
 }
 
+let _sharedCache: { state: GameState; product: number; tdMult: number } | null = null;
+
+function getCachedSharedProduct(state: GameState): { shared: number; tdMult: number } {
+  if (_sharedCache && _sharedCache.state === state) {
+    return { shared: _sharedCache.product, tdMult: _sharedCache.tdMult };
+  }
+  const m = computeSharedMultipliers(state);
+  const shared = sharedMultiplierProduct(m);
+  const tdMult = selectTechDebtMultiplier(state);
+  _sharedCache = { state, product: shared, tdMult };
+  return { shared, tdMult };
+}
+
 function computeSharedMultipliers(state: GameState): SharedMultipliers {
   return {
     global: selectGlobalProductionMultiplier(state),
@@ -267,8 +280,7 @@ export function selectBuildingMastery(state: GameState, buildingId: string): boo
 }
 
 function selectBuildingProductionBeforeMastery(state: GameState, buildingId: string): number {
-  const shared = sharedMultiplierProduct(computeSharedMultipliers(state));
-  const tdMult = selectTechDebtMultiplier(state);
+  const { shared, tdMult } = getCachedSharedProduct(state);
   return buildingProductionWithShared(state, buildingId, shared, tdMult);
 }
 
@@ -285,8 +297,7 @@ let _highestCache: { state: GameState; value: number } | null = null;
 
 function selectHighestProductionBeforeMastery(state: GameState): number {
   if (_highestCache && _highestCache.state === state) return _highestCache.value;
-  const shared = sharedMultiplierProduct(computeSharedMultipliers(state));
-  const tdMult = selectTechDebtMultiplier(state);
+  const { shared, tdMult } = getCachedSharedProduct(state);
   let max = 0;
   for (const def of BUILDINGS) {
     const prod = buildingProductionWithShared(state, def.id, shared, tdMult);
@@ -308,8 +319,7 @@ export function selectBuildingProduction(state: GameState, buildingId: string): 
 }
 
 export function selectLocPerSecond(state: GameState): number {
-  const shared = sharedMultiplierProduct(computeSharedMultipliers(state));
-  const tdMult = selectTechDebtMultiplier(state);
+  const { shared, tdMult } = getCachedSharedProduct(state);
   const highest = selectHighestProductionBeforeMastery(state);
   let total = 0;
   for (const def of BUILDINGS) {

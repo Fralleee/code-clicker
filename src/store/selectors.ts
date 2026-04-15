@@ -173,9 +173,8 @@ function selectTdReduction(state: GameState, buildingId: string): number {
   return reduction;
 }
 
-function selectCleanerUpgradeBonus(state: GameState, buildingId: string): number {
-  const def = BUILDINGS.find((building) => building.id === buildingId);
-  if (!def || def.techDebtRatio >= 0) return 1;
+function selectCleanerUpgradeBonus(state: GameState, buildingId: string, techDebtRatio: number): number {
+  if (techDebtRatio >= 0) return 1;
 
   const standardIds = getStandardUpgradeIds(buildingId);
   let buildingBoosts = 0;
@@ -199,7 +198,7 @@ export function selectNetTechDebtPerSecond(state: GameState): number {
     if (tdRate > 0) {
       tdRate *= selectTdReduction(state, def.id);
     } else if (tdRate < 0) {
-      tdRate *= selectCleanerUpgradeBonus(state, def.id);
+      tdRate *= selectCleanerUpgradeBonus(state, def.id, def.techDebtRatio);
     }
     total += tdRate;
   }

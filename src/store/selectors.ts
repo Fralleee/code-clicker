@@ -208,8 +208,7 @@ function rawLocPerSecondWithShared(state: GameState, shared: number): number {
 }
 
 export function selectTechDebtMultiplier(state: GameState): number {
-  const shared = sharedMultiplierProduct(computeSharedMultipliers(state));
-  return computeTechDebtMultiplier(state, shared);
+  return getCachedSharedProduct(state).tdMult;
 }
 
 function computeTechDebtMultiplier(state: GameState, shared: number): number {

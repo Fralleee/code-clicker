@@ -91,9 +91,10 @@ export function selectAchievementClickBonus(state: GameState): number {
 // === Upgrade Multipliers ===
 
 export function selectBuildingMultiplier(state: GameState, buildingId: string): number {
+  const purchased = getPurchasedSet(state);
   let multiplier = 1;
   for (const boost of BUILDING_BOOST_UPGRADES.get(buildingId) ?? []) {
-    if (getPurchasedSet(state).has(boost.id)) {
+    if (purchased.has(boost.id)) {
       multiplier *= boost.multiplier;
     }
   }
@@ -101,9 +102,10 @@ export function selectBuildingMultiplier(state: GameState, buildingId: string): 
 }
 
 export function selectGlobalProductionMultiplier(state: GameState): number {
+  const purchased = getPurchasedSet(state);
   let multiplier = 1;
   for (const up of GLOBAL_PRODUCTION_UPGRADES) {
-    if (getPurchasedSet(state).has(up.id)) {
+    if (purchased.has(up.id)) {
       multiplier *= up.multiplier;
     }
   }
@@ -200,9 +202,10 @@ export function selectTechDebtMultiplier(state: GameState): number {
 }
 
 function selectTdReduction(state: GameState, buildingId: string): number {
+  const purchased = getPurchasedSet(state);
   let reduction = 1;
   for (const up of TD_REDUCTION_UPGRADES.get(buildingId) ?? []) {
-    if (getPurchasedSet(state).has(up.id)) {
+    if (purchased.has(up.id)) {
       reduction *= 1 - up.reduction;
     }
   }
@@ -212,10 +215,11 @@ function selectTdReduction(state: GameState, buildingId: string): number {
 function selectCleanerUpgradeBonus(state: GameState, buildingId: string, techDebtRatio: number): number {
   if (techDebtRatio >= 0) return 1;
 
+  const purchased = getPurchasedSet(state);
   const standardIds = getStandardUpgradeIds(buildingId);
   let buildingBoosts = 0;
   for (const id of standardIds) {
-    if (getPurchasedSet(state).has(id)) {
+    if (purchased.has(id)) {
       buildingBoosts += 1;
     }
   }
@@ -253,8 +257,9 @@ export function selectBuildingMastery(state: GameState, buildingId: string): boo
   const owned = state.buildings.find((b) => b.id === buildingId);
   if (!owned || owned.count < 500) return false;
   // Only check standard tier upgrades, not cross-building, early, or td_reduction upgrades.
+  const purchased = getPurchasedSet(state);
   for (const upgradeId of getStandardUpgradeIds(buildingId)) {
-    if (!getPurchasedSet(state).has(upgradeId)) {
+    if (!purchased.has(upgradeId)) {
       return false;
     }
   }
@@ -318,9 +323,10 @@ export function selectLocPerSecond(state: GameState): number {
 // === Click Value ===
 
 export function selectClickPowerMultiplier(state: GameState): number {
+  const purchased = getPurchasedSet(state);
   let multiplier = 1;
   for (const up of CLICK_POWER_UPGRADES) {
-    if (getPurchasedSet(state).has(up.id)) {
+    if (purchased.has(up.id)) {
       multiplier *= up.multiplier;
     }
   }
@@ -328,9 +334,10 @@ export function selectClickPowerMultiplier(state: GameState): number {
 }
 
 export function selectCpsClickPercent(state: GameState): number {
+  const purchased = getPurchasedSet(state);
   let percent = 0;
   for (const up of CPS_CLICK_UPGRADES) {
-    if (getPurchasedSet(state).has(up.id)) {
+    if (purchased.has(up.id)) {
       percent += up.percent;
     }
   }
@@ -403,8 +410,9 @@ export function selectVisibleBuildings(state: GameState): VisibleBuilding[] {
 }
 
 export function selectVisibleUpgrades(state: GameState) {
+  const purchased = getPurchasedSet(state);
   return UPGRADES.filter((upgrade): boolean => {
-    if (getPurchasedSet(state).has(upgrade.id)) return false;
+    if (purchased.has(upgrade.id)) return false;
     const cond = upgrade.unlockCondition;
     switch (cond.kind) {
       case "total_loc":

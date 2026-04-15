@@ -225,7 +225,7 @@ export function selectBuildingMastery(state: GameState, buildingId: string): boo
   return true;
 }
 
-function selectBuildingBaseProduction(state: GameState, buildingId: string): number {
+function selectBuildingProductionBeforeMastery(state: GameState, buildingId: string): number {
   const def = BUILDINGS.find((b) => b.id === buildingId);
   const owned = state.buildings.find((b) => b.id === buildingId);
   if (!def || !owned || owned.count === 0) return 0;
@@ -244,21 +244,21 @@ function selectBuildingBaseProduction(state: GameState, buildingId: string): num
   );
 }
 
-function selectHighestBaseProduction(state: GameState): number {
+function selectHighestProductionBeforeMastery(state: GameState): number {
   let max = 0;
   for (const def of BUILDINGS) {
-    const prod = selectBuildingBaseProduction(state, def.id);
+    const prod = selectBuildingProductionBeforeMastery(state, def.id);
     if (prod > max) max = prod;
   }
   return max;
 }
 
 export function selectBuildingProduction(state: GameState, buildingId: string): number {
-  const base = selectBuildingBaseProduction(state, buildingId);
+  const base = selectBuildingProductionBeforeMastery(state, buildingId);
   if (base === 0) return 0;
 
   if (selectBuildingMastery(state, buildingId)) {
-    return selectHighestBaseProduction(state);
+    return selectHighestProductionBeforeMastery(state);
   }
 
   return base;

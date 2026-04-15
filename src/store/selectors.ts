@@ -1,5 +1,13 @@
-import { ACHIEVEMENTS } from "../data/achievements";
 import { BUILDINGS } from "../data/buildings";
+import {
+  ACHIEVEMENT_BY_ID,
+  BUILDING_BOOST_UPGRADES,
+  BUILDING_BY_ID,
+  CLICK_POWER_UPGRADES,
+  CPS_CLICK_UPGRADES,
+  GLOBAL_PRODUCTION_UPGRADES,
+  TD_REDUCTION_UPGRADES,
+} from "../data/lookups";
 import { BASE_PRESTIGE_THRESHOLD, getPrestigeThreshold } from "../data/prestige";
 import { getStandardUpgradeIds } from "../data/standardUpgrades";
 import { UPGRADES } from "../data/upgrades";
@@ -48,7 +56,7 @@ export function selectCleanStartMultiplier(state: GameState): number {
 export function selectAchievementProductionBonus(state: GameState): number {
   let multiplier = 1;
   for (const achId of state.unlockedAchievements) {
-    const ach = ACHIEVEMENTS.find((a) => a.id === achId);
+    const ach = ACHIEVEMENT_BY_ID.get(achId);
     if (ach?.reward?.kind === "production_bonus") {
       multiplier *= ach.reward.multiplier;
     }
@@ -59,7 +67,7 @@ export function selectAchievementProductionBonus(state: GameState): number {
 export function selectAchievementClickBonus(state: GameState): number {
   let multiplier = 1;
   for (const achId of state.unlockedAchievements) {
-    const ach = ACHIEVEMENTS.find((a) => a.id === achId);
+    const ach = ACHIEVEMENT_BY_ID.get(achId);
     if (ach?.reward?.kind === "click_bonus") {
       multiplier *= ach.reward.multiplier;
     }
@@ -71,10 +79,9 @@ export function selectAchievementClickBonus(state: GameState): number {
 
 export function selectBuildingMultiplier(state: GameState, buildingId: string): number {
   let multiplier = 1;
-  for (const upId of state.purchasedUpgrades) {
-    const upgrade = UPGRADES.find((u) => u.id === upId);
-    if (upgrade?.effect.kind === "building_boost" && upgrade.effect.buildingId === buildingId) {
-      multiplier *= upgrade.effect.multiplier;
+  for (const boost of BUILDING_BOOST_UPGRADES.get(buildingId) ?? []) {
+    if (state.purchasedUpgrades.includes(boost.id)) {
+      multiplier *= boost.multiplier;
     }
   }
   return multiplier;
@@ -82,10 +89,9 @@ export function selectBuildingMultiplier(state: GameState, buildingId: string): 
 
 export function selectGlobalProductionMultiplier(state: GameState): number {
   let multiplier = 1;
-  for (const upId of state.purchasedUpgrades) {
-    const upgrade = UPGRADES.find((u) => u.id === upId);
-    if (upgrade?.effect.kind === "global_production") {
-      multiplier *= upgrade.effect.multiplier;
+  for (const up of GLOBAL_PRODUCTION_UPGRADES) {
+    if (state.purchasedUpgrades.includes(up.id)) {
+      multiplier *= up.multiplier;
     }
   }
   return multiplier;
@@ -130,24 +136,42 @@ export function selectIsBugImmune(state: GameState): boolean {
   return state.activeBuffs.some((b) => b.expiresAt > now && b.bugImmunity);
 }
 
+// === Shared Multipliers (computed once, reused across buildings) ===
+
+interface SharedMultipliers {
+  global: number;
+  prestige: number;
+  achievement: number;
+  angel: number;
+  buff: number;
+  prestigeProd: number;
+}
+
+function computeSharedMultipliers(state: GameState): SharedMultipliers {
+  return {
+    global: selectGlobalProductionMultiplier(state),
+    prestige: selectPrestigeMultiplier(state),
+    achievement: selectAchievementProductionBonus(state),
+    angel: selectAngelInvestorBonus(state),
+    buff: selectActiveBuffProductionMultiplier(state),
+    prestigeProd: selectPrestigeProductionBonus(state),
+  };
+}
+
+function sharedMultiplierProduct(m: SharedMultipliers): number {
+  return m.global * m.prestige * m.achievement * m.angel * m.buff * m.prestigeProd;
+}
+
 // === Technical Debt ===
 
 /** Raw LoC/s WITHOUT tech debt penalty (used to scale the TD penalty formula) */
 export function selectRawLocPerSecond(state: GameState): number {
+  const shared = sharedMultiplierProduct(computeSharedMultipliers(state));
   let total = 0;
   for (const def of BUILDINGS) {
     const owned = state.buildings.find((b) => b.id === def.id);
-    if (!def || !owned || owned.count === 0) continue;
-    total +=
-      owned.count *
-      def.baseProduction *
-      selectBuildingMultiplier(state, def.id) *
-      selectGlobalProductionMultiplier(state) *
-      selectPrestigeMultiplier(state) *
-      selectAchievementProductionBonus(state) *
-      selectAngelInvestorBonus(state) *
-      selectActiveBuffProductionMultiplier(state) *
-      selectPrestigeProductionBonus(state);
+    if (!owned || owned.count === 0) continue;
+    total += owned.count * def.baseProduction * selectBuildingMultiplier(state, def.id) * shared;
   }
   return total;
 }
@@ -164,10 +188,9 @@ export function selectTechDebtMultiplier(state: GameState): number {
 
 function selectTdReduction(state: GameState, buildingId: string): number {
   let reduction = 1;
-  for (const upId of state.purchasedUpgrades) {
-    const upgrade = UPGRADES.find((u) => u.id === upId);
-    if (upgrade?.effect.kind === "td_reduction" && upgrade.effect.buildingId === buildingId) {
-      reduction *= 1 - upgrade.effect.reduction;
+  for (const up of TD_REDUCTION_UPGRADES.get(buildingId) ?? []) {
+    if (state.purchasedUpgrades.includes(up.id)) {
+      reduction *= 1 - up.reduction;
     }
   }
   return reduction;
@@ -226,7 +249,7 @@ export function selectBuildingMastery(state: GameState, buildingId: string): boo
 }
 
 function selectBuildingProductionBeforeMastery(state: GameState, buildingId: string): number {
-  const def = BUILDINGS.find((b) => b.id === buildingId);
+  const def = BUILDING_BY_ID.get(buildingId);
   const owned = state.buildings.find((b) => b.id === buildingId);
   if (!def || !owned || owned.count === 0) return 0;
 
@@ -244,13 +267,29 @@ function selectBuildingProductionBeforeMastery(state: GameState, buildingId: str
   );
 }
 
+/** Internal: production with pre-computed shared multipliers (avoids recomputing per building) */
+function buildingProductionWithShared(
+  state: GameState,
+  buildingId: string,
+  shared: number,
+  tdMult: number,
+): number {
+  const def = BUILDING_BY_ID.get(buildingId);
+  const owned = state.buildings.find((b) => b.id === buildingId);
+  if (!def || !owned || owned.count === 0) return 0;
+
+  return owned.count * def.baseProduction * selectBuildingMultiplier(state, buildingId) * shared * tdMult;
+}
+
 let _highestCache: { state: GameState; value: number } | null = null;
 
 function selectHighestProductionBeforeMastery(state: GameState): number {
   if (_highestCache && _highestCache.state === state) return _highestCache.value;
+  const shared = sharedMultiplierProduct(computeSharedMultipliers(state));
+  const tdMult = selectTechDebtMultiplier(state);
   let max = 0;
   for (const def of BUILDINGS) {
-    const prod = selectBuildingProductionBeforeMastery(state, def.id);
+    const prod = buildingProductionWithShared(state, def.id, shared, tdMult);
     if (prod > max) max = prod;
   }
   _highestCache = { state, value: max };
@@ -269,9 +308,14 @@ export function selectBuildingProduction(state: GameState, buildingId: string): 
 }
 
 export function selectLocPerSecond(state: GameState): number {
+  const shared = sharedMultiplierProduct(computeSharedMultipliers(state));
+  const tdMult = selectTechDebtMultiplier(state);
+  const highest = selectHighestProductionBeforeMastery(state);
   let total = 0;
-  for (const building of BUILDINGS) {
-    total += selectBuildingProduction(state, building.id);
+  for (const def of BUILDINGS) {
+    const base = buildingProductionWithShared(state, def.id, shared, tdMult);
+    if (base === 0) continue;
+    total += selectBuildingMastery(state, def.id) ? highest : base;
   }
   return total;
 }
@@ -280,10 +324,9 @@ export function selectLocPerSecond(state: GameState): number {
 
 export function selectClickPowerMultiplier(state: GameState): number {
   let multiplier = 1;
-  for (const upId of state.purchasedUpgrades) {
-    const upgrade = UPGRADES.find((u) => u.id === upId);
-    if (upgrade?.effect.kind === "click_power") {
-      multiplier *= upgrade.effect.multiplier;
+  for (const up of CLICK_POWER_UPGRADES) {
+    if (state.purchasedUpgrades.includes(up.id)) {
+      multiplier *= up.multiplier;
     }
   }
   return multiplier;
@@ -291,10 +334,9 @@ export function selectClickPowerMultiplier(state: GameState): number {
 
 export function selectCpsClickPercent(state: GameState): number {
   let percent = 0;
-  for (const upId of state.purchasedUpgrades) {
-    const upgrade = UPGRADES.find((u) => u.id === upId);
-    if (upgrade?.effect.kind === "click_percent_of_cps") {
-      percent += upgrade.effect.percent;
+  for (const up of CPS_CLICK_UPGRADES) {
+    if (state.purchasedUpgrades.includes(up.id)) {
+      percent += up.percent;
     }
   }
   return percent;

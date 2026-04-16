@@ -47,6 +47,7 @@ export function selectPrestigeClickBonus(state: GameState): number {
   let mult = 1;
   if (state.prestige.prestigeUpgrades.includes("click_mastery")) mult *= 2;
   if (state.prestige.prestigeUpgrades.includes("click_power_large")) mult *= 5;
+  if (state.prestige.prestigeUpgrades.includes("transcendence")) mult *= 100;
   return mult;
 }
 
@@ -54,6 +55,7 @@ export function selectPrestigeProductionBonus(state: GameState): number {
   let mult = 1;
   if (state.prestige.prestigeUpgrades.includes("scaling_expert")) mult *= 1.25;
   if (state.prestige.prestigeUpgrades.includes("double_down")) mult *= 1.5;
+  if (state.prestige.prestigeUpgrades.includes("exponential_growth")) mult *= 3;
   return mult;
 }
 

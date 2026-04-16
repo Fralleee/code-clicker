@@ -17,6 +17,7 @@ export interface ProductionResult {
   techDebtPerSec: number;
   clickValue: number;
   tdMultiplier: number;
+  isRefactoring: boolean;
   buildingProductions: Map<string, number>;
 }
 
@@ -25,15 +26,22 @@ export interface ProductionResult {
  * Shared multipliers are computed once and reused across all buildings.
  */
 export function computeAllProduction(state: GameState): ProductionResult {
+  const now = Date.now();
   const purchasedSet = new Set(state.purchasedUpgrades);
-  const shared = computeSharedMultiplierProduct(state, purchasedSet);
+  const shared = computeSharedMultiplierProduct(state, purchasedSet, now);
+
+  // Build owned-count lookup once (avoids repeated .find() in loops)
+  const ownedCounts = new Map<string, number>();
+  for (const b of state.buildings) {
+    if (b.count > 0) ownedCounts.set(b.id, b.count);
+  }
 
   // Raw LoC/s (without TD penalty) — needed for TD penalty formula
   let rawLocPerSec = 0;
   for (const def of BUILDINGS) {
-    const owned = state.buildings.find((b) => b.id === def.id);
-    if (!owned || owned.count === 0) continue;
-    rawLocPerSec += owned.count * def.baseProduction * computeBuildingMultiplier(def.id, purchasedSet) * shared;
+    const count = ownedCounts.get(def.id);
+    if (!count) continue;
+    rawLocPerSec += count * def.baseProduction * computeBuildingMultiplier(def.id, purchasedSet) * shared;
   }
 
   // TD multiplier (depends on raw production)
@@ -46,10 +54,9 @@ export function computeAllProduction(state: GameState): ProductionResult {
 
   // First pass: compute base production for all buildings, find highest
   for (const def of BUILDINGS) {
-    const owned = state.buildings.find((b) => b.id === def.id);
-    if (!owned || owned.count === 0) continue;
-    const base =
-      owned.count * def.baseProduction * computeBuildingMultiplier(def.id, purchasedSet) * shared * tdMultiplier;
+    const count = ownedCounts.get(def.id);
+    if (!count) continue;
+    const base = count * def.baseProduction * computeBuildingMultiplier(def.id, purchasedSet) * shared * tdMultiplier;
     buildingProductions.set(def.id, base);
     if (base > highest) highest = base;
   }
@@ -67,21 +74,28 @@ export function computeAllProduction(state: GameState): ProductionResult {
     }
   }
 
-  // Check if refactoring (paused production)
-  const isRefactoring = (state.refactoringUntil ?? 0) > Date.now();
+  const isRefactoring = (state.refactoringUntil ?? 0) > now;
   if (isRefactoring) locPerSec = 0;
 
   // Tech debt per second
-  const isFrozen = state.activeBuffs.some((b) => b.expiresAt > Date.now() && b.tdFreeze);
+  const isFrozen = state.activeBuffs.some((b) => b.expiresAt > now && b.tdFreeze);
   const techDebtPerSec = isFrozen ? 0 : computeNetTdPerSecond(state, purchasedSet);
 
   // Click value
-  const clickValue = computeClickValue(state, purchasedSet, locPerSec);
+  const clickValue = computeClickValue(state, purchasedSet, locPerSec, now);
 
-  return { locPerSec, rawLocPerSec, techDebtPerSec, clickValue, tdMultiplier, buildingProductions };
+  return {
+    locPerSec,
+    rawLocPerSec,
+    techDebtPerSec,
+    clickValue,
+    tdMultiplier,
+    isRefactoring,
+    buildingProductions,
+  };
 }
 
-// === Multiplier helpers ===
+// === Shared helpers (used by both production and techDebt engines) ===
 
 export function computeBuildingMultiplier(buildingId: string, purchasedSet: Set<string>): number {
   let multiplier = 1;
@@ -93,7 +107,9 @@ export function computeBuildingMultiplier(buildingId: string, purchasedSet: Set<
   return multiplier;
 }
 
-function computeSharedMultiplierProduct(state: GameState, purchasedSet: Set<string>): number {
+// === Internal helpers ===
+
+function computeSharedMultiplierProduct(state: GameState, purchasedSet: Set<string>, now: number): number {
   let global = 1;
   for (const up of GLOBAL_PRODUCTION_UPGRADES) {
     if (purchasedSet.has(up.id)) global *= up.multiplier;
@@ -108,7 +124,6 @@ function computeSharedMultiplierProduct(state: GameState, purchasedSet: Set<stri
     if (ach?.reward?.kind === "production_bonus") achievement *= ach.reward.multiplier;
   }
 
-  const now = Date.now();
   let buff = 1;
   for (const b of state.activeBuffs) {
     if (b.expiresAt > now && b.productionMultiplier) buff *= b.productionMultiplier;
@@ -130,7 +145,7 @@ function isMastered(state: GameState, buildingId: string, purchasedSet: Set<stri
   return true;
 }
 
-function computeClickValue(state: GameState, purchasedSet: Set<string>, locPerSec: number): number {
+function computeClickValue(state: GameState, purchasedSet: Set<string>, locPerSec: number, now: number): number {
   let clickMult = 1;
   for (const up of CLICK_POWER_UPGRADES) {
     if (purchasedSet.has(up.id)) clickMult *= up.multiplier;
@@ -149,7 +164,6 @@ function computeClickValue(state: GameState, purchasedSet: Set<string>, locPerSe
     if (ach?.reward?.kind === "click_bonus") achBonus *= ach.reward.multiplier;
   }
 
-  const now = Date.now();
   let buffMult = 1;
   for (const b of state.activeBuffs) {
     if (b.expiresAt > now && b.clickMultiplier) buffMult *= b.clickMultiplier;

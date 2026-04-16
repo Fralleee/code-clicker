@@ -1,9 +1,10 @@
 import { GAME_CONFIG } from "../config/gameConfig";
 import { getBugSpawnInterval, getMaxActiveBugs } from "../data/bugs";
 import { BUILDINGS } from "../data/buildings";
-import { BUILDING_BOOST_UPGRADES, TD_REDUCTION_UPGRADES } from "../data/lookups";
+import { TD_REDUCTION_UPGRADES } from "../data/lookups";
 import { getStandardUpgradeIds } from "../data/standardUpgrades";
 import type { GameState } from "../types/game";
+import { computeBuildingMultiplier } from "./production";
 
 export interface TechDebtStatus {
   current: number;
@@ -81,16 +82,6 @@ export function computeTechDebtStatus(
 }
 
 // === Internal helpers ===
-
-function computeBuildingMultiplier(buildingId: string, purchasedSet: Set<string>): number {
-  let multiplier = 1;
-  for (const boost of BUILDING_BOOST_UPGRADES.get(buildingId) ?? []) {
-    if (purchasedSet.has(boost.id)) {
-      multiplier *= boost.multiplier;
-    }
-  }
-  return multiplier;
-}
 
 function computeTdReduction(buildingId: string, purchasedSet: Set<string>): number {
   let reduction = 1;

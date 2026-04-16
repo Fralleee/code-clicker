@@ -29,11 +29,16 @@ const MASS_HIRING_BUILDINGS = ["intern", "junior_dev", "senior_dev"];
 
 function createInitialBuildingsWithBonuses(prestigeUpgrades: string[]): OwnedBuilding[] {
   const hasMassHiring = prestigeUpgrades.includes("mass_hiring");
+  const hasMegaHiring = prestigeUpgrades.includes("mega_hiring");
   return BUILDINGS.map((b) => {
     let count = 0;
     if (b.id === "senior_dev" && prestigeUpgrades.includes("senior_network")) count += 1;
     if (b.id === "devops" && prestigeUpgrades.includes("free_devops")) count += 1;
-    if (hasMassHiring && MASS_HIRING_BUILDINGS.includes(b.id)) count += 5;
+    if (hasMegaHiring) {
+      count += 10;
+    } else if (hasMassHiring && MASS_HIRING_BUILDINGS.includes(b.id)) {
+      count += 5;
+    }
     return { id: b.id, count, totalProduced: 0 };
   });
 }
@@ -256,7 +261,10 @@ export const useGameStore = create<GameStore>()(
       if (!saved) return false;
 
       const now = Date.now();
-      const elapsed = Math.min((now - saved.lastTickTimestamp) / 1000, GAME_CONFIG.offline.maxSeconds);
+      const offlineCap = saved.prestige.prestigeUpgrades.includes("time_warp")
+        ? GAME_CONFIG.offline.extendedMaxSeconds
+        : GAME_CONFIG.offline.maxSeconds;
+      const elapsed = Math.min((now - saved.lastTickTimestamp) / 1000, offlineCap);
       const locPerSec = selectLocPerSecond(saved);
       const offlineEarned = Math.max(0, locPerSec * elapsed);
 
@@ -441,10 +449,13 @@ export const useGameStore = create<GameStore>()(
       if (currentTD <= 0) return false;
       if ((state.refactoringUntil ?? 0) > Date.now()) return false;
 
+      const retainRate = state.prestige.prestigeUpgrades.includes("improved_refactor")
+        ? GAME_CONFIG.techDebt.improvedRefactorRetainRate
+        : GAME_CONFIG.techDebt.refactorRetainRate;
       set({
         resources: {
           ...state.resources,
-          techDebt: Math.max(0, currentTD * GAME_CONFIG.techDebt.refactorRetainRate),
+          techDebt: Math.max(0, currentTD * retainRate),
         },
         refactoringUntil: Date.now() + GAME_CONFIG.techDebt.refactorDurationMs,
       });

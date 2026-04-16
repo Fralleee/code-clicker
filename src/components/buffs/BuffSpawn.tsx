@@ -46,7 +46,8 @@ export function BuffSpawnLayer() {
       }
 
       if (result.productionMultiplier || result.clickMultiplier) {
-        const duration = result.duration ?? 30;
+        let duration = result.duration ?? 30;
+        if (state.prestige.prestigeUpgrades.includes("buff_mastery")) duration *= 2;
         state.addBuff({
           id: `${item.data.id}_${Date.now()}`,
           buffId: item.data.id,

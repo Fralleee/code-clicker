@@ -136,6 +136,7 @@ function computeSharedMultiplierProduct(state: GameState, purchasedSet: Set<stri
   let prestigeProd = 1;
   if (state.prestige.prestigeUpgrades.includes("scaling_expert")) prestigeProd *= 1.25;
   if (state.prestige.prestigeUpgrades.includes("double_down")) prestigeProd *= 1.5;
+  if (state.prestige.prestigeUpgrades.includes("exponential_growth")) prestigeProd *= 3;
 
   return global * prestige * angel * achievement * buff * prestigeProd;
 }
@@ -175,6 +176,7 @@ function computeClickValue(state: GameState, purchasedSet: Set<string>, locPerSe
   let prestigeClick = 1;
   if (state.prestige.prestigeUpgrades.includes("click_mastery")) prestigeClick *= 2;
   if (state.prestige.prestigeUpgrades.includes("click_power_large")) prestigeClick *= 5;
+  if (state.prestige.prestigeUpgrades.includes("transcendence")) prestigeClick *= 100;
 
   const rawValue = Math.floor(1 * clickMult * prestige * achBonus * prestigeClick) + locPerSec * cpsPercent;
   return Math.floor(rawValue * buffMult);

@@ -10,6 +10,7 @@ export const GAME_CONFIG = {
     divisorScale: 15,
     refactorDurationMs: 10_000,
     refactorRetainRate: 0.3,
+    improvedRefactorRetainRate: 0.1,
     cleanStartDurationSec: 60,
     cleanStartMultiplier: 0.5,
     peakBonusThreshold: 10_000,
@@ -35,6 +36,7 @@ export const GAME_CONFIG = {
   prestige: {
     baseThreshold: 1_000_000,
     reducedThreshold: 500_000,
+    instantEmpireThreshold: 100_000,
     reputationBonusRate: 0.01,
   },
   tick: {
@@ -42,6 +44,7 @@ export const GAME_CONFIG = {
   },
   offline: {
     maxSeconds: 8 * 60 * 60,
+    extendedMaxSeconds: 24 * 60 * 60,
   },
   autosave: {
     intervalMs: 30_000,

@@ -1,16 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { BugDefinition } from "../../data/bugs";
 import { getBugSpawnInterval, getMaxActiveBugs, pickRandomBug } from "../../data/bugs";
+import type { SpawnedItem } from "../../hooks/useSpawnSystem";
+import { useSpawnSystem } from "../../hooks/useSpawnSystem";
 import { useGameStore } from "../../store/gameStore";
 import { selectIsBugImmune, selectLocPerSecond, selectRawLocPerSecond } from "../../store/selectors";
-
-interface SpawnedBug {
-  key: number;
-  bug: BugDefinition;
-  x: number;
-  y: number;
-  spawnedAt: number;
-}
 
 interface BugMessage {
   key: number;
@@ -18,109 +12,80 @@ interface BugMessage {
   isPositive: boolean;
 }
 
-let bugKey = 0;
+let msgKey = 0;
 
 export function BugSpawnLayer() {
-  const [bugs, setBugs] = useState<SpawnedBug[]>([]);
   const [messages, setMessages] = useState<BugMessage[]>([]);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const td = useGameStore((s) => s.resources.techDebt);
 
-  const scheduleSpawn = useCallback(() => {
-    // Reference td to trigger re-scheduling when debt changes
-    void td;
-    const state = useGameStore.getState();
-    const rawLoC = selectRawLocPerSecond(state);
-    const currentTd = state.resources.techDebt ?? 0;
-    const { min, max } = getBugSpawnInterval(rawLoC, currentTd);
-    if (!Number.isFinite(min)) return;
-
-    const delay = min + Math.random() * (max - min);
-    timerRef.current = setTimeout(() => {
-      const freshState = useGameStore.getState();
-      const freshRawLoC = selectRawLocPerSecond(freshState);
-      const freshTd = freshState.resources.techDebt ?? 0;
-
-      if (selectIsBugImmune(freshState)) {
-        scheduleSpawn();
-        return;
-      }
-
-      setBugs((current) => {
-        const maxBugs = getMaxActiveBugs(freshRawLoC, freshTd);
-        if (current.length >= maxBugs) return current;
-
-        const bug = pickRandomBug(freshRawLoC, freshTd);
-        const x = 80 + Math.random() * (window.innerWidth - 160);
-        const y = 80 + Math.random() * (window.innerHeight - 160);
-        return [...current, { key: bugKey++, bug, x, y, spawnedAt: Date.now() }];
-      });
-
-      scheduleSpawn();
-    }, delay);
-  }, [td]);
-
-  useEffect(() => {
-    scheduleSpawn();
-    return () => clearTimeout(timerRef.current);
-  }, [scheduleSpawn]);
-
-  // Check for expired bugs every 500ms
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = Date.now();
-      setBugs((current) => {
-        const expired: SpawnedBug[] = [];
-        const alive: SpawnedBug[] = [];
-        for (const b of current) {
-          if (now - b.spawnedAt > b.bug.lifetimeMs) {
-            expired.push(b);
-          } else {
-            alive.push(b);
-          }
-        }
-        for (const b of expired) {
-          applyMissPenalty(b, setMessages);
-        }
-        return alive;
-      });
-    }, 500);
-    return () => clearInterval(interval);
+  const onExpire = useCallback((item: SpawnedItem<BugDefinition>) => {
+    applyMissPenalty(item, setMessages);
   }, []);
 
-  const handleFix = useCallback((target: SpawnedBug) => {
-    const state = useGameStore.getState();
-    const locPerSec = selectLocPerSecond(state);
-
-    const reward = Math.max(0, locPerSec * target.bug.fixRewardSeconds);
-    if (reward > 0) state.addLoC(reward);
-
-    const tdReduction = Math.max(5, (state.resources.techDebt ?? 0) * target.bug.fixTdReductionPercent);
-    state.reduceTechDebt(tdReduction);
-
-    const msgKey = bugKey++;
-    const severityLabel =
-      target.bug.severity === "critical"
-        ? "Critical fix!"
-        : target.bug.severity === "major"
-          ? "Bug squashed!"
-          : "Quick fix!";
-    setMessages((prev) => [
-      ...prev,
-      {
-        key: msgKey,
-        message: `${target.bug.icon} ${severityLabel} +${fmt(reward)} LoC, -${Math.floor(tdReduction)} TD`,
-        isPositive: true,
+  const { items, removeItem } = useSpawnSystem<BugDefinition>(
+    {
+      getInterval: () => {
+        const state = useGameStore.getState();
+        const rawLoC = selectRawLocPerSecond(state);
+        const currentTd = state.resources.techDebt ?? 0;
+        return getBugSpawnInterval(rawLoC, currentTd);
       },
-    ]);
-    setTimeout(() => setMessages((prev) => prev.filter((m) => m.key !== msgKey)), 3000);
+      canSpawn: (current) => {
+        const state = useGameStore.getState();
+        if (selectIsBugImmune(state)) return false;
+        const rawLoC = selectRawLocPerSecond(state);
+        const currentTd = state.resources.techDebt ?? 0;
+        return current.length < getMaxActiveBugs(rawLoC, currentTd);
+      },
+      createItem: () => {
+        const state = useGameStore.getState();
+        const rawLoC = selectRawLocPerSecond(state);
+        const currentTd = state.resources.techDebt ?? 0;
+        return pickRandomBug(rawLoC, currentTd);
+      },
+      getLifetime: (bug) => bug.lifetimeMs,
+      onExpire,
+      padding: 80,
+    },
+    td,
+  );
 
-    setBugs((current) => current.filter((b) => b.key !== target.key));
-  }, []);
+  const handleFix = useCallback(
+    (target: SpawnedItem<BugDefinition>) => {
+      const state = useGameStore.getState();
+      const locPerSec = selectLocPerSecond(state);
+
+      const reward = Math.max(0, locPerSec * target.data.fixRewardSeconds);
+      if (reward > 0) state.addLoC(reward);
+
+      const tdReduction = Math.max(5, (state.resources.techDebt ?? 0) * target.data.fixTdReductionPercent);
+      state.reduceTechDebt(tdReduction);
+
+      const key = msgKey++;
+      const severityLabel =
+        target.data.severity === "critical"
+          ? "Critical fix!"
+          : target.data.severity === "major"
+            ? "Bug squashed!"
+            : "Quick fix!";
+      setMessages((prev) => [
+        ...prev,
+        {
+          key,
+          message: `${target.data.icon} ${severityLabel} +${fmt(reward)} LoC, -${Math.floor(tdReduction)} TD`,
+          isPositive: true,
+        },
+      ]);
+      setTimeout(() => setMessages((prev) => prev.filter((m) => m.key !== key)), 3000);
+
+      removeItem(target.key);
+    },
+    [removeItem],
+  );
 
   return (
     <>
-      {bugs.map((b) => (
+      {items.map((b) => (
         <BugOrb key={b.key} spawned={b} onClick={() => handleFix(b)} />
       ))}
       <div className="fixed top-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-50 pointer-events-none">
@@ -141,22 +106,23 @@ export function BugSpawnLayer() {
   );
 }
 
-function applyMissPenalty(b: SpawnedBug, setMessages: React.Dispatch<React.SetStateAction<BugMessage[]>>) {
+function applyMissPenalty(
+  b: SpawnedItem<BugDefinition>,
+  setMessages: React.Dispatch<React.SetStateAction<BugMessage[]>>,
+) {
   const state = useGameStore.getState();
   const locPerSec = selectLocPerSecond(state);
-  const penalty = Math.max(0, locPerSec * b.bug.missPenaltySeconds);
+  const penalty = Math.max(0, locPerSec * b.data.missPenaltySeconds);
 
   if (penalty > 0) {
     state.deductLoC(penalty);
   }
 
-  // Apply special miss effects
-  if (b.bug.missEffect === "production_freeze") {
-    // Mini-refactor: pause production for 5 seconds
+  if (b.data.missEffect === "production_freeze") {
     useGameStore.setState({
       refactoringUntil: Date.now() + 5_000,
     });
-  } else if (b.bug.missEffect === "td_double") {
+  } else if (b.data.missEffect === "td_double") {
     const currentTd = state.resources.techDebt ?? 0;
     useGameStore.setState({
       resources: {
@@ -169,43 +135,39 @@ function applyMissPenalty(b: SpawnedBug, setMessages: React.Dispatch<React.SetSt
   }
 
   const severityText =
-    b.bug.severity === "critical"
+    b.data.severity === "critical"
       ? "CRITICAL escaped!"
-      : b.bug.severity === "major"
+      : b.data.severity === "major"
         ? "Bug escaped!"
         : "Bug slipped through.";
 
   const effectText =
-    b.bug.missEffect === "production_freeze"
+    b.data.missEffect === "production_freeze"
       ? " Production frozen 5s!"
-      : b.bug.missEffect === "td_double"
+      : b.data.missEffect === "td_double"
         ? " Tech debt doubled!"
         : "";
 
-  const msgKey = bugKey++;
+  const key = msgKey++;
   setMessages((prev) => [
     ...prev,
-    {
-      key: msgKey,
-      message: `${b.bug.icon} ${severityText} -${fmt(penalty)} LoC${effectText}`,
-      isPositive: false,
-    },
+    { key, message: `${b.data.icon} ${severityText} -${fmt(penalty)} LoC${effectText}`, isPositive: false },
   ]);
-  setTimeout(() => setMessages((prev) => prev.filter((m) => m.key !== msgKey)), 4000);
+  setTimeout(() => setMessages((prev) => prev.filter((m) => m.key !== key)), 4000);
 }
 
-function BugOrb({ spawned, onClick }: { spawned: SpawnedBug; onClick: () => void }) {
+function BugOrb({ spawned, onClick }: { spawned: SpawnedItem<BugDefinition>; onClick: () => void }) {
   const [opacity, setOpacity] = useState(1);
 
   useEffect(() => {
     const interval = setInterval(() => {
       const elapsed = Date.now() - spawned.spawnedAt;
-      setOpacity(Math.max(0, 1 - elapsed / spawned.bug.lifetimeMs));
+      setOpacity(Math.max(0, 1 - elapsed / spawned.data.lifetimeMs));
     }, 50);
     return () => clearInterval(interval);
-  }, [spawned.spawnedAt, spawned.bug.lifetimeMs]);
+  }, [spawned.spawnedAt, spawned.data.lifetimeMs]);
 
-  const sev = spawned.bug.severity;
+  const sev = spawned.data.severity;
 
   const sizeClass =
     sev === "critical" ? "w-16 h-16 text-3xl" : sev === "major" ? "w-14 h-14 text-2xl" : "w-12 h-12 text-xl";
@@ -237,9 +199,9 @@ function BugOrb({ spawned, onClick }: { spawned: SpawnedBug; onClick: () => void
         opacity,
         animation: `${sev === "critical" ? "shake" : "bob"} ${animSpeed} ease-in-out infinite`,
       }}
-      title={`${spawned.bug.name} [${sev.toUpperCase()}] - Click to fix!`}
+      title={`${spawned.data.name} [${sev.toUpperCase()}] - Click to fix!`}
     >
-      {spawned.bug.icon}
+      {spawned.data.icon}
     </button>
   );
 }

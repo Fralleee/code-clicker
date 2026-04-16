@@ -22,6 +22,7 @@ let globalKey = 0;
 export function useSpawnSystem<T>(config: SpawnConfig<T>, rescheduleTrigger?: unknown) {
   const [items, setItems] = useState<SpawnedItem<T>[]>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const mountedRef = useRef(true);
   const configRef = useRef(config);
   configRef.current = config;
 
@@ -31,6 +32,8 @@ export function useSpawnSystem<T>(config: SpawnConfig<T>, rescheduleTrigger?: un
 
     const delay = min + Math.random() * Math.max(0, max - min);
     timerRef.current = setTimeout(() => {
+      if (!mountedRef.current) return;
+
       setItems((current) => {
         if (!configRef.current.canSpawn(current)) return current;
 
@@ -49,9 +52,13 @@ export function useSpawnSystem<T>(config: SpawnConfig<T>, rescheduleTrigger?: un
   // Reschedule when trigger changes (e.g., tech debt for bug spawn rate)
   // biome-ignore lint/correctness/useExhaustiveDependencies: rescheduleTrigger is an intentional external trigger
   useEffect(() => {
+    mountedRef.current = true;
     clearTimeout(timerRef.current);
     scheduleSpawn();
-    return () => clearTimeout(timerRef.current);
+    return () => {
+      mountedRef.current = false;
+      clearTimeout(timerRef.current);
+    };
   }, [scheduleSpawn, rescheduleTrigger]);
 
   // Check for expired items every 500ms

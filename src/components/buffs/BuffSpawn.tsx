@@ -72,7 +72,7 @@ export function BuffSpawnLayer() {
 
   return (
     <>
-      {spawned && <SpawnedBuffButton spawned={spawned} onClick={() => handleClick(spawned)} />}
+      {spawned && <SpawnedBuffButton key={spawned.key} spawned={spawned} onClick={() => handleClick(spawned)} />}
 
       <div className="fixed top-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-50 pointer-events-none">
         {messages.map((m) => (

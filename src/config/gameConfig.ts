@@ -9,11 +9,11 @@ export const GAME_CONFIG = {
     divisorMin: 1000,
     divisorScale: 15,
     refactorDurationMs: 10_000,
-    refactorRetainPercent: 0.3,
+    refactorRetainRate: 0.3,
     cleanStartDurationSec: 60,
     cleanStartMultiplier: 0.5,
     peakBonusThreshold: 10_000,
-    peakBonusMaxPercent: 0.1,
+    peakBonusMaxRate: 0.1,
   },
   bugs: {
     noSpawnThreshold: 1,
@@ -33,7 +33,7 @@ export const GAME_CONFIG = {
   prestige: {
     baseThreshold: 1_000_000,
     reducedThreshold: 500_000,
-    reputationBonusPercent: 0.01,
+    reputationBonusRate: 0.01,
   },
   tick: {
     intervalMs: 50,

@@ -455,7 +455,7 @@ export const useGameStore = create<GameStore>()(
       set({
         resources: {
           ...state.resources,
-          techDebt: Math.max(0, currentTD * GAME_CONFIG.techDebt.refactorRetainPercent),
+          techDebt: Math.max(0, currentTD * GAME_CONFIG.techDebt.refactorRetainRate),
         },
         refactoringUntil: Date.now() + GAME_CONFIG.techDebt.refactorDurationMs,
       });

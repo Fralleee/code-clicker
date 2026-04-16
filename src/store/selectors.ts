@@ -30,7 +30,7 @@ function getPurchasedSet(state: GameState): Set<string> {
 // === Prestige Multipliers ===
 
 export function selectPrestigeMultiplier(state: GameState): number {
-  return 1 + state.prestige.totalReputationEarned * GAME_CONFIG.prestige.reputationBonusPercent;
+  return 1 + state.prestige.totalReputationEarned * GAME_CONFIG.prestige.reputationBonusRate;
 }
 
 export function selectAngelInvestorBonus(state: GameState): number {
@@ -400,8 +400,8 @@ export function selectReputationOnPrestige(state: GameState): number {
   }
   const peakTD = state.resources.peakTechDebt ?? 0;
   if (peakTD > 0) {
-    const { peakBonusThreshold, peakBonusMaxPercent } = GAME_CONFIG.techDebt;
-    rep = Math.floor(rep * (1 + Math.min(peakTD / peakBonusThreshold, 1) * peakBonusMaxPercent));
+    const { peakBonusThreshold, peakBonusMaxRate } = GAME_CONFIG.techDebt;
+    rep = Math.floor(rep * (1 + Math.min(peakTD / peakBonusThreshold, 1) * peakBonusMaxRate));
   }
   return rep;
 }

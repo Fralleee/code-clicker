@@ -22,33 +22,33 @@ export function BugSpawnLayer() {
     applyMissPenalty(item, setMessages);
   }, []);
 
-  const { items, removeItem } = useSpawnSystem<BugDefinition>({
-    getInterval: () => {
-      const state = useGameStore.getState();
-      const rawLoC = selectRawLocPerSecond(state);
-      const currentTd = state.resources.techDebt ?? 0;
-      return getBugSpawnInterval(rawLoC, currentTd);
+  const { items, removeItem } = useSpawnSystem<BugDefinition>(
+    {
+      getInterval: () => {
+        const state = useGameStore.getState();
+        const rawLoC = selectRawLocPerSecond(state);
+        const currentTd = state.resources.techDebt ?? 0;
+        return getBugSpawnInterval(rawLoC, currentTd);
+      },
+      canSpawn: (current) => {
+        const state = useGameStore.getState();
+        if (selectIsBugImmune(state)) return false;
+        const rawLoC = selectRawLocPerSecond(state);
+        const currentTd = state.resources.techDebt ?? 0;
+        return current.length < getMaxActiveBugs(rawLoC, currentTd);
+      },
+      createItem: () => {
+        const state = useGameStore.getState();
+        const rawLoC = selectRawLocPerSecond(state);
+        const currentTd = state.resources.techDebt ?? 0;
+        return pickRandomBug(rawLoC, currentTd);
+      },
+      getLifetime: (bug) => bug.lifetimeMs,
+      onExpire,
+      padding: 80,
     },
-    canSpawn: (current) => {
-      const state = useGameStore.getState();
-      if (selectIsBugImmune(state)) return false;
-      const rawLoC = selectRawLocPerSecond(state);
-      const currentTd = state.resources.techDebt ?? 0;
-      return current.length < getMaxActiveBugs(rawLoC, currentTd);
-    },
-    createItem: () => {
-      const state = useGameStore.getState();
-      const rawLoC = selectRawLocPerSecond(state);
-      const currentTd = state.resources.techDebt ?? 0;
-      return pickRandomBug(rawLoC, currentTd);
-    },
-    getLifetime: (bug) => bug.lifetimeMs,
-    onExpire,
-    padding: 80,
-  });
-
-  // Force re-render when TD changes to reschedule spawn intervals
-  void td;
+    td,
+  );
 
   const handleFix = useCallback(
     (target: SpawnedItem<BugDefinition>) => {

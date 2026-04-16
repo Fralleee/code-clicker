@@ -7,11 +7,11 @@ import {
   CLICK_POWER_UPGRADES,
   CPS_CLICK_UPGRADES,
   GLOBAL_PRODUCTION_UPGRADES,
-  TD_REDUCTION_UPGRADES,
 } from "../data/lookups";
 import { BASE_PRESTIGE_THRESHOLD, getPrestigeThreshold } from "../data/prestige";
 import { getStandardUpgradeIds } from "../data/standardUpgrades";
 import { UPGRADES } from "../data/upgrades";
+import { computeNetTdPerSecond, computeTdPenalty } from "../engine/techDebt";
 import type { GameState } from "../types/game";
 
 // === Purchased Upgrades Set (O(1) lookups, memoized per state) ===
@@ -57,12 +57,7 @@ export function selectPrestigeProductionBonus(state: GameState): number {
   return mult;
 }
 
-export function selectCleanStartMultiplier(state: GameState): number {
-  if (!state.prestige.prestigeUpgrades.includes("clean_start")) return 1;
-  const elapsed = state.stats.totalTimePlayed;
-  if (elapsed < GAME_CONFIG.techDebt.cleanStartDurationSec) return GAME_CONFIG.techDebt.cleanStartMultiplier;
-  return 1;
-}
+export { computeCleanStartMultiplier as selectCleanStartMultiplier } from "../engine/techDebt";
 
 // === Achievement Bonuses ===
 
@@ -214,61 +209,12 @@ export function selectTechDebtMultiplier(state: GameState): number {
 function computeTechDebtMultiplier(state: GameState, shared: number): number {
   const td = state.resources.techDebt ?? 0;
   if (td <= 0) return 1;
-  // Divisor scales with production based on GAME_CONFIG.techDebt.divisorScale
   const rawLocPerSec = rawLocPerSecondWithShared(state, shared);
-  const { divisorMin, divisorScale, penaltyAmplitude, minMultiplier } = GAME_CONFIG.techDebt;
-  const divisor = Math.max(divisorMin, rawLocPerSec * divisorScale);
-  const penalty = penaltyAmplitude * (1 - Math.exp(-td / divisor));
-  return Math.max(minMultiplier, 1 - penalty);
-}
-
-function selectTdReduction(state: GameState, buildingId: string): number {
-  const purchased = getPurchasedSet(state);
-  let reduction = 1;
-  for (const up of TD_REDUCTION_UPGRADES.get(buildingId) ?? []) {
-    if (purchased.has(up.id)) {
-      reduction *= 1 - up.reduction;
-    }
-  }
-  return reduction;
-}
-
-function selectCleanerUpgradeBonus(state: GameState, buildingId: string, techDebtRatio: number): number {
-  if (techDebtRatio >= 0) return 1;
-
-  const purchased = getPurchasedSet(state);
-  const standardIds = getStandardUpgradeIds(buildingId);
-  let buildingBoosts = 0;
-  for (const id of standardIds) {
-    if (purchased.has(id)) {
-      buildingBoosts += 1;
-    }
-  }
-
-  return 1 + buildingBoosts * 0.1;
+  return computeTdPenalty(td, rawLocPerSec);
 }
 
 export function selectNetTechDebtPerSecond(state: GameState): number {
-  let total = 0;
-  for (const def of BUILDINGS) {
-    const owned = state.buildings.find((b) => b.id === def.id);
-    if (!owned || owned.count === 0) continue;
-    const buildingMult = selectBuildingMultiplier(state, def.id);
-    let tdRate = owned.count * def.baseProduction * def.techDebtRatio * buildingMult;
-    // TD reduction upgrades only apply to positive (debt-generating) buildings
-    if (tdRate > 0) {
-      tdRate *= selectTdReduction(state, def.id);
-    } else if (tdRate < 0) {
-      tdRate *= selectCleanerUpgradeBonus(state, def.id, def.techDebtRatio);
-    }
-    total += tdRate;
-  }
-  // Clean Codebase prestige upgrade: 50% less TD in first 60s
-  // Only reduce positive (generation) part, not negative (cleanup) part
-  if (total > 0) {
-    total *= selectCleanStartMultiplier(state);
-  }
-  return total;
+  return computeNetTdPerSecond(state, getPurchasedSet(state));
 }
 
 // === Building Production ===

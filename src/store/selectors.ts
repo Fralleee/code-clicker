@@ -214,7 +214,7 @@ export function selectTechDebtMultiplier(state: GameState): number {
 function computeTechDebtMultiplier(state: GameState, shared: number): number {
   const td = state.resources.techDebt ?? 0;
   if (td <= 0) return 1;
-  // Divisor scales with production: ~15s of accumulated TD ≈ 50% penalty
+  // Divisor scales with production based on GAME_CONFIG.techDebt.divisorScale
   const rawLocPerSec = rawLocPerSecondWithShared(state, shared);
   const { divisorMin, divisorScale, penaltyAmplitude, minMultiplier } = GAME_CONFIG.techDebt;
   const divisor = Math.max(divisorMin, rawLocPerSec * divisorScale);
@@ -273,7 +273,7 @@ export function selectNetTechDebtPerSecond(state: GameState): number {
 
 // === Building Production ===
 
-/** Mastery: 500 count + all standard tier upgrades purchased → mirrors highest building production */
+/** Mastery: masteryCount + all standard tier upgrades purchased → mirrors highest building production */
 export function selectBuildingMastery(state: GameState, buildingId: string): boolean {
   const owned = state.buildings.find((b) => b.id === buildingId);
   if (!owned || owned.count < GAME_CONFIG.buildings.masteryCount) return false;

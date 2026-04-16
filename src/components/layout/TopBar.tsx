@@ -115,7 +115,7 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
       <div className="flex items-center gap-2">
         {confirmingRestart ? (
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-accent-pink font-semibold">Are you sure?</span>
+            <span className="text-xs text-accent-pink font-semibold">Erase all progress?</span>
             <button
               type="button"
               onClick={() => {
@@ -124,7 +124,7 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
               }}
               className="px-2 py-1 rounded text-xs font-semibold bg-accent-pink/20 text-accent-pink border border-accent-pink/40 hover:bg-accent-pink/30 cursor-pointer transition-colors"
             >
-              OK
+              Yes, restart
             </button>
             <button
               type="button"

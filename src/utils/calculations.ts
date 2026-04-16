@@ -1,3 +1,4 @@
+import { GAME_CONFIG } from "../config/gameConfig";
 import type { BuildingDefinition, BuyQuantity } from "../types/game";
 
 export function calculateBuildingCost(building: BuildingDefinition, owned: number, quantity: number = 1): number {
@@ -10,7 +11,7 @@ export function calculateBuildingCost(building: BuildingDefinition, owned: numbe
   return Math.floor((base * (r ** quantity - 1)) / (r - 1));
 }
 
-export const MAX_BUILDING_COUNT = 500;
+export const MAX_BUILDING_COUNT = GAME_CONFIG.buildings.maxCount;
 
 export function calculateMaxAffordable(building: BuildingDefinition, owned: number, budget: number): number {
   if (budget <= 0) return 0;

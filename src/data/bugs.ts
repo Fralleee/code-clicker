@@ -1,3 +1,5 @@
+import { GAME_CONFIG } from "../config/gameConfig";
+
 export type BugSeverity = "minor" | "major" | "critical";
 
 export interface BugDefinition {
@@ -129,11 +131,10 @@ export function pickRandomBug(rawLocPerSec: number, techDebt: number): BugDefini
 
   // Weight severity based on TD relative to production
   let pool: BugDefinition[];
-  if (tdRatio < 2) {
-    // Low TD: only minor
+  const { minorOnlyThreshold, majorThreshold } = GAME_CONFIG.bugs;
+  if (tdRatio < minorOnlyThreshold) {
     pool = MINOR_BUGS;
-  } else if (tdRatio < 10) {
-    // Moderate: minor + major, weighted
+  } else if (tdRatio < majorThreshold) {
     pool = [...MINOR_BUGS, ...MINOR_BUGS, ...MAJOR_BUGS];
   } else {
     // High: all severities, criticals more likely
@@ -146,22 +147,31 @@ export function pickRandomBug(rawLocPerSec: number, techDebt: number): BugDefini
 export function getMaxActiveBugs(rawLocPerSec: number, techDebt: number): number {
   if (rawLocPerSec <= 0) return 1;
   const tdRatio = techDebt / rawLocPerSec;
-  if (tdRatio < 2) return 1;
-  if (tdRatio < 10) return 2;
+  if (tdRatio < GAME_CONFIG.bugs.minorOnlyThreshold) return 1;
+  if (tdRatio < GAME_CONFIG.bugs.majorThreshold) return 2;
   return 3;
 }
 
 export function getBugSpawnInterval(rawLocPerSec: number, techDebt: number): { min: number; max: number } {
-  if (techDebt < 100 && rawLocPerSec < 1) return { min: Number.POSITIVE_INFINITY, max: Number.POSITIVE_INFINITY };
+  if (techDebt < GAME_CONFIG.bugs.minTechDebtToSpawn && rawLocPerSec < GAME_CONFIG.bugs.minProductionToSpawn) {
+    return { min: Number.POSITIVE_INFINITY, max: Number.POSITIVE_INFINITY };
+  }
 
   const tdRatio = rawLocPerSec > 0 ? techDebt / rawLocPerSec : 0;
 
-  if (tdRatio < 1) return { min: Number.POSITIVE_INFINITY, max: Number.POSITIVE_INFINITY };
+  const {
+    noSpawnThreshold,
+    spawnScaleDivisor,
+    baseMinIntervalMs,
+    baseMaxIntervalMs,
+    minIntervalFloorMs,
+    maxIntervalFloorMs,
+  } = GAME_CONFIG.bugs;
+  if (tdRatio < noSpawnThreshold) return { min: Number.POSITIVE_INFINITY, max: Number.POSITIVE_INFINITY };
 
-  // Scale spawn rate with TD ratio
-  const scale = Math.min(tdRatio / 15, 1);
+  const scale = Math.min(tdRatio / spawnScaleDivisor, 1);
   return {
-    min: Math.max(5_000, 60_000 * (1 - scale)),
-    max: Math.max(10_000, 90_000 * (1 - scale)),
+    min: Math.max(minIntervalFloorMs, baseMinIntervalMs * (1 - scale)),
+    max: Math.max(maxIntervalFloorMs, baseMaxIntervalMs * (1 - scale)),
   };
 }

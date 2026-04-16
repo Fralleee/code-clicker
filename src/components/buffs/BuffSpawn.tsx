@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { GAME_CONFIG } from "../../config/gameConfig";
 import type { BuffContext, BuffDefinition } from "../../data/buffs";
 import { pickRandomBuff } from "../../data/buffs";
 import { useGameStore } from "../../store/gameStore";
@@ -12,9 +13,9 @@ interface SpawnedBuff {
   spawnedAt: number;
 }
 
-const SPAWN_DURATION = 10_000; // 10 seconds to click
-const MIN_SPAWN_INTERVAL = 45_000; // min 45s between spawns
-const MAX_SPAWN_INTERVAL = 120_000; // max 2min between spawns
+const SPAWN_DURATION = GAME_CONFIG.buffs.spawnDurationMs;
+const MIN_SPAWN_INTERVAL = GAME_CONFIG.buffs.minSpawnIntervalMs;
+const MAX_SPAWN_INTERVAL = GAME_CONFIG.buffs.maxSpawnIntervalMs;
 
 let spawnKey = 0;
 

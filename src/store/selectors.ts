@@ -1,3 +1,4 @@
+import { GAME_CONFIG } from "../config/gameConfig";
 import { BUILDINGS } from "../data/buildings";
 import {
   ACHIEVEMENT_BY_ID,
@@ -29,7 +30,7 @@ function getPurchasedSet(state: GameState): Set<string> {
 // === Prestige Multipliers ===
 
 export function selectPrestigeMultiplier(state: GameState): number {
-  return 1 + state.prestige.totalReputationEarned * 0.01;
+  return 1 + state.prestige.totalReputationEarned * GAME_CONFIG.prestige.reputationBonusRate;
 }
 
 export function selectAngelInvestorBonus(state: GameState): number {
@@ -58,9 +59,8 @@ export function selectPrestigeProductionBonus(state: GameState): number {
 
 export function selectCleanStartMultiplier(state: GameState): number {
   if (!state.prestige.prestigeUpgrades.includes("clean_start")) return 1;
-  // 50% less TD generation in first 60 seconds of a run
   const elapsed = state.stats.totalTimePlayed;
-  if (elapsed < 60) return 0.5;
+  if (elapsed < GAME_CONFIG.techDebt.cleanStartDurationSec) return GAME_CONFIG.techDebt.cleanStartMultiplier;
   return 1;
 }
 
@@ -214,11 +214,12 @@ export function selectTechDebtMultiplier(state: GameState): number {
 function computeTechDebtMultiplier(state: GameState, shared: number): number {
   const td = state.resources.techDebt ?? 0;
   if (td <= 0) return 1;
-  // Divisor scales with production: ~15s of accumulated TD ≈ 50% penalty
+  // Divisor scales with production based on GAME_CONFIG.techDebt.divisorScale
   const rawLocPerSec = rawLocPerSecondWithShared(state, shared);
-  const divisor = Math.max(1000, rawLocPerSec * 15);
-  const penalty = 0.75 * (1 - Math.exp(-td / divisor));
-  return Math.max(0.25, 1 - penalty);
+  const { divisorMin, divisorScale, penaltyAmplitude, minMultiplier } = GAME_CONFIG.techDebt;
+  const divisor = Math.max(divisorMin, rawLocPerSec * divisorScale);
+  const penalty = penaltyAmplitude * (1 - Math.exp(-td / divisor));
+  return Math.max(minMultiplier, 1 - penalty);
 }
 
 function selectTdReduction(state: GameState, buildingId: string): number {
@@ -272,10 +273,10 @@ export function selectNetTechDebtPerSecond(state: GameState): number {
 
 // === Building Production ===
 
-/** Mastery: 500 count + all standard tier upgrades purchased → mirrors highest building production */
+/** Mastery: masteryCount + all standard tier upgrades purchased → mirrors highest building production */
 export function selectBuildingMastery(state: GameState, buildingId: string): boolean {
   const owned = state.buildings.find((b) => b.id === buildingId);
-  if (!owned || owned.count < 500) return false;
+  if (!owned || owned.count < GAME_CONFIG.buildings.masteryCount) return false;
   // Only check standard tier upgrades, not cross-building, early, or td_reduction upgrades.
   const purchased = getPurchasedSet(state);
   for (const upgradeId of getStandardUpgradeIds(buildingId)) {
@@ -397,10 +398,10 @@ export function selectReputationOnPrestige(state: GameState): number {
   if (state.prestige.prestigeUpgrades.includes("reputation_double")) {
     rep *= 2;
   }
-  // Peak tech debt bonus: up to +10% at 10K peak TD
   const peakTD = state.resources.peakTechDebt ?? 0;
   if (peakTD > 0) {
-    rep = Math.floor(rep * (1 + Math.min(peakTD / 10_000, 1) * 0.1));
+    const { peakBonusThreshold, peakBonusMaxRate } = GAME_CONFIG.techDebt;
+    rep = Math.floor(rep * (1 + Math.min(peakTD / peakBonusThreshold, 1) * peakBonusMaxRate));
   }
   return rep;
 }

@@ -327,12 +327,17 @@ export function selectBuildingProduction(state: GameState, buildingId: string): 
 
 export function selectLocPerSecond(state: GameState): number {
   const { shared, tdMult } = getCachedSharedProduct(state);
-  const highest = selectHighestProductionBeforeMastery(state);
+  let highest: number | null = null;
   let total = 0;
   for (const def of BUILDINGS) {
     const base = buildingProductionWithShared(state, def.id, shared, tdMult);
     if (base === 0) continue;
-    total += selectBuildingMastery(state, def.id) ? highest : base;
+    if (selectBuildingMastery(state, def.id)) {
+      highest ??= selectHighestProductionBeforeMastery(state);
+      total += highest;
+    } else {
+      total += base;
+    }
   }
   return total;
 }

@@ -1,9 +1,30 @@
-import { ACHIEVEMENTS } from "../data/achievements";
 import { BUILDINGS } from "../data/buildings";
+import {
+  ACHIEVEMENT_BY_ID,
+  BUILDING_BOOST_UPGRADES,
+  BUILDING_BY_ID,
+  CLICK_POWER_UPGRADES,
+  CPS_CLICK_UPGRADES,
+  GLOBAL_PRODUCTION_UPGRADES,
+  TD_REDUCTION_UPGRADES,
+} from "../data/lookups";
 import { BASE_PRESTIGE_THRESHOLD, getPrestigeThreshold } from "../data/prestige";
 import { getStandardUpgradeIds } from "../data/standardUpgrades";
 import { UPGRADES } from "../data/upgrades";
 import type { GameState } from "../types/game";
+
+// === Purchased Upgrades Set (O(1) lookups, memoized per state) ===
+
+let _upgradeSetCache: { upgrades: string[]; set: Set<string> } | null = null;
+
+function getPurchasedSet(state: GameState): Set<string> {
+  if (_upgradeSetCache && _upgradeSetCache.upgrades === state.purchasedUpgrades) {
+    return _upgradeSetCache.set;
+  }
+  const set = new Set(state.purchasedUpgrades);
+  _upgradeSetCache = { upgrades: state.purchasedUpgrades, set };
+  return set;
+}
 
 // === Prestige Multipliers ===
 
@@ -48,7 +69,7 @@ export function selectCleanStartMultiplier(state: GameState): number {
 export function selectAchievementProductionBonus(state: GameState): number {
   let multiplier = 1;
   for (const achId of state.unlockedAchievements) {
-    const ach = ACHIEVEMENTS.find((a) => a.id === achId);
+    const ach = ACHIEVEMENT_BY_ID.get(achId);
     if (ach?.reward?.kind === "production_bonus") {
       multiplier *= ach.reward.multiplier;
     }
@@ -59,7 +80,7 @@ export function selectAchievementProductionBonus(state: GameState): number {
 export function selectAchievementClickBonus(state: GameState): number {
   let multiplier = 1;
   for (const achId of state.unlockedAchievements) {
-    const ach = ACHIEVEMENTS.find((a) => a.id === achId);
+    const ach = ACHIEVEMENT_BY_ID.get(achId);
     if (ach?.reward?.kind === "click_bonus") {
       multiplier *= ach.reward.multiplier;
     }
@@ -70,22 +91,22 @@ export function selectAchievementClickBonus(state: GameState): number {
 // === Upgrade Multipliers ===
 
 export function selectBuildingMultiplier(state: GameState, buildingId: string): number {
+  const purchased = getPurchasedSet(state);
   let multiplier = 1;
-  for (const upId of state.purchasedUpgrades) {
-    const upgrade = UPGRADES.find((u) => u.id === upId);
-    if (upgrade?.effect.kind === "building_boost" && upgrade.effect.buildingId === buildingId) {
-      multiplier *= upgrade.effect.multiplier;
+  for (const boost of BUILDING_BOOST_UPGRADES.get(buildingId) ?? []) {
+    if (purchased.has(boost.id)) {
+      multiplier *= boost.multiplier;
     }
   }
   return multiplier;
 }
 
 export function selectGlobalProductionMultiplier(state: GameState): number {
+  const purchased = getPurchasedSet(state);
   let multiplier = 1;
-  for (const upId of state.purchasedUpgrades) {
-    const upgrade = UPGRADES.find((u) => u.id === upId);
-    if (upgrade?.effect.kind === "global_production") {
-      multiplier *= upgrade.effect.multiplier;
+  for (const up of GLOBAL_PRODUCTION_UPGRADES) {
+    if (purchased.has(up.id)) {
+      multiplier *= up.multiplier;
     }
   }
   return multiplier;
@@ -130,44 +151,82 @@ export function selectIsBugImmune(state: GameState): boolean {
   return state.activeBuffs.some((b) => b.expiresAt > now && b.bugImmunity);
 }
 
+// === Shared Multipliers (computed once, reused across buildings) ===
+
+interface SharedMultipliers {
+  global: number;
+  prestige: number;
+  achievement: number;
+  angel: number;
+  buff: number;
+  prestigeProd: number;
+}
+
+let _sharedCache: { state: GameState; product: number; tdMult: number } | null = null;
+
+function getCachedSharedProduct(state: GameState): { shared: number; tdMult: number } {
+  if (_sharedCache && _sharedCache.state === state) {
+    return { shared: _sharedCache.product, tdMult: _sharedCache.tdMult };
+  }
+  const shared = sharedMultiplierProduct(computeSharedMultipliers(state));
+  const tdMult = computeTechDebtMultiplier(state, shared);
+  _sharedCache = { state, product: shared, tdMult };
+  return { shared, tdMult };
+}
+
+function computeSharedMultipliers(state: GameState): SharedMultipliers {
+  return {
+    global: selectGlobalProductionMultiplier(state),
+    prestige: selectPrestigeMultiplier(state),
+    achievement: selectAchievementProductionBonus(state),
+    angel: selectAngelInvestorBonus(state),
+    buff: selectActiveBuffProductionMultiplier(state),
+    prestigeProd: selectPrestigeProductionBonus(state),
+  };
+}
+
+function sharedMultiplierProduct(m: SharedMultipliers): number {
+  return m.global * m.prestige * m.achievement * m.angel * m.buff * m.prestigeProd;
+}
+
 // === Technical Debt ===
 
 /** Raw LoC/s WITHOUT tech debt penalty (used to scale the TD penalty formula) */
 export function selectRawLocPerSecond(state: GameState): number {
+  const shared = sharedMultiplierProduct(computeSharedMultipliers(state));
+  return rawLocPerSecondWithShared(state, shared);
+}
+
+function rawLocPerSecondWithShared(state: GameState, shared: number): number {
   let total = 0;
   for (const def of BUILDINGS) {
     const owned = state.buildings.find((b) => b.id === def.id);
-    if (!def || !owned || owned.count === 0) continue;
-    total +=
-      owned.count *
-      def.baseProduction *
-      selectBuildingMultiplier(state, def.id) *
-      selectGlobalProductionMultiplier(state) *
-      selectPrestigeMultiplier(state) *
-      selectAchievementProductionBonus(state) *
-      selectAngelInvestorBonus(state) *
-      selectActiveBuffProductionMultiplier(state) *
-      selectPrestigeProductionBonus(state);
+    if (!owned || owned.count === 0) continue;
+    total += owned.count * def.baseProduction * selectBuildingMultiplier(state, def.id) * shared;
   }
   return total;
 }
 
 export function selectTechDebtMultiplier(state: GameState): number {
+  return getCachedSharedProduct(state).tdMult;
+}
+
+function computeTechDebtMultiplier(state: GameState, shared: number): number {
   const td = state.resources.techDebt ?? 0;
   if (td <= 0) return 1;
   // Divisor scales with production: ~15s of accumulated TD ≈ 50% penalty
-  const rawLocPerSec = selectRawLocPerSecond(state);
+  const rawLocPerSec = rawLocPerSecondWithShared(state, shared);
   const divisor = Math.max(1000, rawLocPerSec * 15);
   const penalty = 0.75 * (1 - Math.exp(-td / divisor));
   return Math.max(0.25, 1 - penalty);
 }
 
 function selectTdReduction(state: GameState, buildingId: string): number {
+  const purchased = getPurchasedSet(state);
   let reduction = 1;
-  for (const upId of state.purchasedUpgrades) {
-    const upgrade = UPGRADES.find((u) => u.id === upId);
-    if (upgrade?.effect.kind === "td_reduction" && upgrade.effect.buildingId === buildingId) {
-      reduction *= 1 - upgrade.effect.reduction;
+  for (const up of TD_REDUCTION_UPGRADES.get(buildingId) ?? []) {
+    if (purchased.has(up.id)) {
+      reduction *= 1 - up.reduction;
     }
   }
   return reduction;
@@ -176,10 +235,11 @@ function selectTdReduction(state: GameState, buildingId: string): number {
 function selectCleanerUpgradeBonus(state: GameState, buildingId: string, techDebtRatio: number): number {
   if (techDebtRatio >= 0) return 1;
 
+  const purchased = getPurchasedSet(state);
   const standardIds = getStandardUpgradeIds(buildingId);
   let buildingBoosts = 0;
   for (const id of standardIds) {
-    if (state.purchasedUpgrades.includes(id)) {
+    if (purchased.has(id)) {
       buildingBoosts += 1;
     }
   }
@@ -217,8 +277,9 @@ export function selectBuildingMastery(state: GameState, buildingId: string): boo
   const owned = state.buildings.find((b) => b.id === buildingId);
   if (!owned || owned.count < 500) return false;
   // Only check standard tier upgrades, not cross-building, early, or td_reduction upgrades.
+  const purchased = getPurchasedSet(state);
   for (const upgradeId of getStandardUpgradeIds(buildingId)) {
-    if (!state.purchasedUpgrades.includes(upgradeId)) {
+    if (!purchased.has(upgradeId)) {
       return false;
     }
   }
@@ -226,31 +287,27 @@ export function selectBuildingMastery(state: GameState, buildingId: string): boo
 }
 
 function selectBuildingProductionBeforeMastery(state: GameState, buildingId: string): number {
-  const def = BUILDINGS.find((b) => b.id === buildingId);
+  const { shared, tdMult } = getCachedSharedProduct(state);
+  return buildingProductionWithShared(state, buildingId, shared, tdMult);
+}
+
+/** Internal: production with pre-computed shared multipliers (avoids recomputing per building) */
+function buildingProductionWithShared(state: GameState, buildingId: string, shared: number, tdMult: number): number {
+  const def = BUILDING_BY_ID.get(buildingId);
   const owned = state.buildings.find((b) => b.id === buildingId);
   if (!def || !owned || owned.count === 0) return 0;
 
-  return (
-    owned.count *
-    def.baseProduction *
-    selectBuildingMultiplier(state, buildingId) *
-    selectGlobalProductionMultiplier(state) *
-    selectPrestigeMultiplier(state) *
-    selectAchievementProductionBonus(state) *
-    selectAngelInvestorBonus(state) *
-    selectActiveBuffProductionMultiplier(state) *
-    selectPrestigeProductionBonus(state) *
-    selectTechDebtMultiplier(state)
-  );
+  return owned.count * def.baseProduction * selectBuildingMultiplier(state, buildingId) * shared * tdMult;
 }
 
 let _highestCache: { state: GameState; value: number } | null = null;
 
 function selectHighestProductionBeforeMastery(state: GameState): number {
   if (_highestCache && _highestCache.state === state) return _highestCache.value;
+  const { shared, tdMult } = getCachedSharedProduct(state);
   let max = 0;
   for (const def of BUILDINGS) {
-    const prod = selectBuildingProductionBeforeMastery(state, def.id);
+    const prod = buildingProductionWithShared(state, def.id, shared, tdMult);
     if (prod > max) max = prod;
   }
   _highestCache = { state, value: max };
@@ -269,9 +326,18 @@ export function selectBuildingProduction(state: GameState, buildingId: string): 
 }
 
 export function selectLocPerSecond(state: GameState): number {
+  const { shared, tdMult } = getCachedSharedProduct(state);
+  let highest: number | null = null;
   let total = 0;
-  for (const building of BUILDINGS) {
-    total += selectBuildingProduction(state, building.id);
+  for (const def of BUILDINGS) {
+    const base = buildingProductionWithShared(state, def.id, shared, tdMult);
+    if (base === 0) continue;
+    if (selectBuildingMastery(state, def.id)) {
+      highest ??= selectHighestProductionBeforeMastery(state);
+      total += highest;
+    } else {
+      total += base;
+    }
   }
   return total;
 }
@@ -279,22 +345,22 @@ export function selectLocPerSecond(state: GameState): number {
 // === Click Value ===
 
 export function selectClickPowerMultiplier(state: GameState): number {
+  const purchased = getPurchasedSet(state);
   let multiplier = 1;
-  for (const upId of state.purchasedUpgrades) {
-    const upgrade = UPGRADES.find((u) => u.id === upId);
-    if (upgrade?.effect.kind === "click_power") {
-      multiplier *= upgrade.effect.multiplier;
+  for (const up of CLICK_POWER_UPGRADES) {
+    if (purchased.has(up.id)) {
+      multiplier *= up.multiplier;
     }
   }
   return multiplier;
 }
 
 export function selectCpsClickPercent(state: GameState): number {
+  const purchased = getPurchasedSet(state);
   let percent = 0;
-  for (const upId of state.purchasedUpgrades) {
-    const upgrade = UPGRADES.find((u) => u.id === upId);
-    if (upgrade?.effect.kind === "click_percent_of_cps") {
-      percent += upgrade.effect.percent;
+  for (const up of CPS_CLICK_UPGRADES) {
+    if (purchased.has(up.id)) {
+      percent += up.percent;
     }
   }
   return percent;
@@ -366,8 +432,9 @@ export function selectVisibleBuildings(state: GameState): VisibleBuilding[] {
 }
 
 export function selectVisibleUpgrades(state: GameState) {
+  const purchased = getPurchasedSet(state);
   return UPGRADES.filter((upgrade): boolean => {
-    if (state.purchasedUpgrades.includes(upgrade.id)) return false;
+    if (purchased.has(upgrade.id)) return false;
     const cond = upgrade.unlockCondition;
     switch (cond.kind) {
       case "total_loc":

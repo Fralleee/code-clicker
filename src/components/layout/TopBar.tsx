@@ -29,6 +29,7 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
   const canPrestige = selectCanPrestige(state);
   const repOnPrestige = selectReputationOnPrestige(state);
   const reputation = useGameStore((s) => s.prestige.totalReputationEarned);
+  const prestigeUpgrades = useGameStore((s) => s.prestige.prestigeUpgrades);
   const netTdPerSec = selectNetTechDebtPerSecond(state);
   const debtMult = selectTechDebtMultiplier(state);
 
@@ -36,7 +37,7 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
   const penaltyPercent = Math.round((1 - debtMult) * 100);
   const isRefactoring = (refactoringUntil ?? 0) > Date.now();
   const refactorRemaining = isRefactoring ? Math.ceil(((refactoringUntil ?? 0) - Date.now()) / 1000) : 0;
-  const hasImprovedRefactor = state.prestige.prestigeUpgrades.includes("improved_refactor");
+  const hasImprovedRefactor = prestigeUpgrades.includes("improved_refactor");
   const refactorRemovalPercent = hasImprovedRefactor
     ? Math.round((1 - GAME_CONFIG.techDebt.improvedRefactorRetainRate) * 100)
     : Math.round((1 - GAME_CONFIG.techDebt.refactorRetainRate) * 100);

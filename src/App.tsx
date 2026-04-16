@@ -75,7 +75,7 @@ export default function App() {
 
         {/* Center - Code Editor */}
         <main className="flex-1 p-2 lg:p-4 lg:shrink-0 lg:flex-none flex items-start justify-center min-h-0 pb-16 lg:pb-0">
-          <div className="w-full h-full max-w-160 lg:w-120 lg:h-100 xl:w-160 xl:h-120">
+          <div className="w-full h-full max-w-160 lg:w-100 lg:h-100 xl:w-160 xl:h-120">
             <CodeEditor />
           </div>
         </main>

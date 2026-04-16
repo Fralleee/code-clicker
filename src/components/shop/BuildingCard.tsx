@@ -77,25 +77,25 @@ export function BuildingCard({ building, buyQuantity }: Props) {
             </span>
           </div>
           <div className="text-xs text-text-muted truncate">{building.description}</div>
-          <div className="flex items-center justify-between mt-1">
+          <div className="flex items-center justify-between mt-1 gap-2">
             {isMaxCount ? (
-              <span className="text-xs text-accent-gold font-semibold">
+              <span className="text-xs text-accent-gold font-semibold shrink-0">
                 {isMastered ? "Mastered!" : `${owned}/${MAX_BUILDING_COUNT}`}
               </span>
             ) : (
-              <span className={`font-mono text-xs ${canAfford ? "text-accent-green" : "text-accent-pink"}`}>
+              <span className={`font-mono text-xs shrink-0 ${canAfford ? "text-accent-green" : "text-accent-pink"}`}>
                 {displayQty > 1 ? `${displayQty}x ` : ""}
                 {formatNumber(totalCost)} LoC
               </span>
             )}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0 justify-end">
               {totalProduction > 0 && (
-                <span className="text-xs text-accent-cyan">total: {formatNumber(totalProduction)}/s</span>
+                <span className="text-xs text-accent-cyan truncate">{formatNumber(totalProduction)}/s</span>
               )}
               {owned > 0 && eachTD !== 0 && (
-                <span className={`text-xs ${eachTD > 0 ? "text-accent-pink" : "text-accent-green"}`}>
+                <span className={`text-xs shrink-0 ${eachTD > 0 ? "text-accent-pink" : "text-accent-green"}`}>
                   {eachTD > 0 ? "+" : ""}
-                  {formatNumber(eachTD * owned)}/s TD
+                  {formatNumber(eachTD * owned)} TD
                 </span>
               )}
             </div>

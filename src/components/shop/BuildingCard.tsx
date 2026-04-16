@@ -95,7 +95,7 @@ export function BuildingCard({ building, buyQuantity }: Props) {
         <div className="flex items-center gap-3">
           {totalProduction > 0 && <span className="text-xs text-accent-cyan">{formatNumber(totalProduction)}/s</span>}
           {owned > 0 && eachTD !== 0 && (
-            <span className={`text-xs ${eachTD > 0 ? "text-accent-pink" : "text-accent-green"}`}>
+            <span className={`text-xs whitespace-nowrap ${eachTD > 0 ? "text-accent-pink" : "text-accent-green"}`}>
               {eachTD > 0 ? "+" : ""}
               {formatNumber(eachTD * owned)}/s TD
             </span>

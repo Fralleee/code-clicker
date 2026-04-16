@@ -65,7 +65,7 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
         </div>
 
         {/* Mobile: inline LoC/s */}
-        <span className="font-mono text-xs text-accent-cyan font-semibold lg:hidden">{formatRate(locPerSec)}/s</span>
+        <span className="font-mono text-xs text-accent-cyan font-semibold lg:hidden">{formatRate(locPerSec)}</span>
 
         {/* Desktop: production stats */}
         <div className="hidden lg:flex flex-col gap-0.5">

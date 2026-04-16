@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { GAME_CONFIG } from "../../config/gameConfig";
 import { useGameStore } from "../../store/gameStore";
 import {
   selectCanPrestige,
@@ -35,6 +36,10 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
   const penaltyPercent = Math.round((1 - debtMult) * 100);
   const isRefactoring = (refactoringUntil ?? 0) > Date.now();
   const refactorRemaining = isRefactoring ? Math.ceil(((refactoringUntil ?? 0) - Date.now()) / 1000) : 0;
+  const hasImprovedRefactor = state.prestige.prestigeUpgrades.includes("improved_refactor");
+  const refactorRemovalPercent = hasImprovedRefactor
+    ? Math.round((1 - GAME_CONFIG.techDebt.improvedRefactorRetainRate) * 100)
+    : Math.round((1 - GAME_CONFIG.techDebt.refactorRetainRate) * 100);
 
   // Force re-render every second during refactoring so the countdown ticks
   const [, setRenderTick] = useState(0);
@@ -104,9 +109,9 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
                 onClick={() => refactorDebt()}
                 disabled={td <= 0}
                 className="mt-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-accent-green/10 text-accent-green border border-accent-green/20 hover:bg-accent-green/20 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                title={`Pauses 10s, removes ${formatNumber(td * 0.7)} TD`}
+                title={`Pauses 10s, removes ${formatNumber(td * (refactorRemovalPercent / 100))} TD`}
               >
-                Refactor (-70% TD)
+                Refactor (-{refactorRemovalPercent}% TD)
               </button>
             )}
           </div>

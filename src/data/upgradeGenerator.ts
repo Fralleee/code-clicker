@@ -10,13 +10,30 @@ const TIER_COST_MULTIPLIERS = [
 /** Production multiplier granted by each tier */
 const TIER_EFFECT_MULTIPLIERS = [2, 2, 2, 2, 2, 3, 3, 3, 5, 3, 3, 5, 5, 3, 3, 3, 3, 5, 5, 5, 5] as const;
 
-/** Building count thresholds for each tier */
+/**
+ * Building count thresholds for each tier, in tier order (not ascending).
+ * Same values as STANDARD_BUILDING_UPGRADE_LEVELS in standardUpgrades.ts but
+ * ordered by tier progression: tiers 1-9 (10-200), 10-13 (250-500), 14-21 (225-475).
+ */
 const TIER_UNLOCK_COUNTS = [
   10, 25, 50, 75, 100, 125, 150, 175, 200, 250, 300, 400, 500, 225, 275, 325, 350, 375, 425, 450, 475,
 ] as const;
 
 const FLAVOR_TIER_COUNT = 13;
 const TOTAL_TIERS = TIER_COST_MULTIPLIERS.length;
+
+// Validate all tier arrays are consistent
+if (TIER_EFFECT_MULTIPLIERS.length !== TOTAL_TIERS) {
+  throw new Error(`TIER_EFFECT_MULTIPLIERS has ${TIER_EFFECT_MULTIPLIERS.length} entries, expected ${TOTAL_TIERS}.`);
+}
+if (TIER_UNLOCK_COUNTS.length !== TOTAL_TIERS) {
+  throw new Error(`TIER_UNLOCK_COUNTS has ${TIER_UNLOCK_COUNTS.length} entries, expected ${TOTAL_TIERS}.`);
+}
+if (MILESTONE_ICONS.length !== TOTAL_TIERS - FLAVOR_TIER_COUNT) {
+  throw new Error(
+    `MILESTONE_ICONS has ${MILESTONE_ICONS.length} entries, expected ${TOTAL_TIERS - FLAVOR_TIER_COUNT}.`,
+  );
+}
 
 export function generateBuildingUpgrades(buildings: readonly BuildingDefinition[]): UpgradeDefinition[] {
   const upgrades: UpgradeDefinition[] = [];

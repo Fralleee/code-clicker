@@ -16,6 +16,7 @@ const TIER_UNLOCK_COUNTS = [
 ] as const;
 
 const FLAVOR_TIER_COUNT = 13;
+const TOTAL_TIERS = TIER_COST_MULTIPLIERS.length;
 
 export function generateBuildingUpgrades(buildings: readonly BuildingDefinition[]): UpgradeDefinition[] {
   const upgrades: UpgradeDefinition[] = [];
@@ -25,11 +26,11 @@ export function generateBuildingUpgrades(buildings: readonly BuildingDefinition[
     if (!flavor) {
       throw new Error(`Missing UPGRADE_FLAVOR entry for building "${building.id}".`);
     }
-    if (flavor.length < FLAVOR_TIER_COUNT) {
+    if (flavor.length !== FLAVOR_TIER_COUNT) {
       throw new Error(`UPGRADE_FLAVOR["${building.id}"] has ${flavor.length} entries, expected ${FLAVOR_TIER_COUNT}.`);
     }
 
-    for (let i = 0; i < 21; i++) {
+    for (let i = 0; i < TOTAL_TIERS; i++) {
       const tier = i + 1;
       const multiplier = TIER_EFFECT_MULTIPLIERS[i];
 

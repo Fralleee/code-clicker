@@ -157,7 +157,14 @@ export function getBugSpawnInterval(rawLocPerSec: number, techDebt: number): { m
 
   const tdRatio = rawLocPerSec > 0 ? techDebt / rawLocPerSec : 0;
 
-  const { noSpawnThreshold, spawnScaleDivisor, baseMinIntervalMs, baseMaxIntervalMs, minIntervalFloorMs, maxIntervalFloorMs } = GAME_CONFIG.bugs;
+  const {
+    noSpawnThreshold,
+    spawnScaleDivisor,
+    baseMinIntervalMs,
+    baseMaxIntervalMs,
+    minIntervalFloorMs,
+    maxIntervalFloorMs,
+  } = GAME_CONFIG.bugs;
   if (tdRatio < noSpawnThreshold) return { min: Number.POSITIVE_INFINITY, max: Number.POSITIVE_INFINITY };
 
   const scale = Math.min(tdRatio / spawnScaleDivisor, 1);

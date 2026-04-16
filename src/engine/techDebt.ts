@@ -18,7 +18,7 @@ export interface TechDebtStatus {
 
 /**
  * Compute the TD penalty multiplier applied to production.
- * Returns 1.0 when no debt, asymptotically approaches minMultiplier (0.25) at high debt.
+ * Returns 1.0 when no debt, asymptotically approaches GAME_CONFIG.techDebt.minMultiplier at high debt.
  */
 export function computeTdPenalty(techDebt: number, rawLocPerSec: number): number {
   if (techDebt <= 0) return 1;
@@ -80,20 +80,6 @@ export function computeTechDebtStatus(
   };
 }
 
-/**
- * Compute the TD cost and maximum TD threshold for activating a hack.
- */
-export function computeHackTdCost(
-  rawLocPerSec: number,
-  techDebtCostSeconds: number,
-  maxTechDebtSeconds: number,
-): { tdCost: number; maxTd: number } {
-  return {
-    tdCost: rawLocPerSec * techDebtCostSeconds,
-    maxTd: rawLocPerSec * maxTechDebtSeconds,
-  };
-}
-
 // === Internal helpers ===
 
 function computeBuildingMultiplier(buildingId: string, purchasedSet: Set<string>): number {
@@ -126,7 +112,7 @@ function computeCleanerBonus(buildingId: string, techDebtRatio: number, purchase
   return 1 + boosts * 0.1;
 }
 
-function computeCleanStartMultiplier(state: GameState): number {
+export function computeCleanStartMultiplier(state: GameState): number {
   if (!state.prestige.prestigeUpgrades.includes("clean_start")) return 1;
   const elapsed = state.stats.totalTimePlayed;
   if (elapsed < GAME_CONFIG.techDebt.cleanStartDurationSec) return GAME_CONFIG.techDebt.cleanStartMultiplier;

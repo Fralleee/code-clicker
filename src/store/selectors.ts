@@ -57,13 +57,7 @@ export function selectPrestigeProductionBonus(state: GameState): number {
   return mult;
 }
 
-export function selectCleanStartMultiplier(state: GameState): number {
-  if (!state.prestige.prestigeUpgrades.includes("clean_start")) return 1;
-  if (state.stats.totalTimePlayed < GAME_CONFIG.techDebt.cleanStartDurationSec) {
-    return GAME_CONFIG.techDebt.cleanStartMultiplier;
-  }
-  return 1;
-}
+export { computeCleanStartMultiplier as selectCleanStartMultiplier } from "../engine/techDebt";
 
 // === Achievement Bonuses ===
 

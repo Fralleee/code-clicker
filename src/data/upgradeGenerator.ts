@@ -23,7 +23,10 @@ export function generateBuildingUpgrades(buildings: readonly BuildingDefinition[
   for (const building of buildings) {
     const flavor = UPGRADE_FLAVOR[building.id];
     if (!flavor) {
-      throw new Error(`Missing UPGRADE_FLAVOR entry for building "${building.id}" in generateBuildingUpgrades.`);
+      throw new Error(`Missing UPGRADE_FLAVOR entry for building "${building.id}".`);
+    }
+    if (flavor.length < FLAVOR_TIER_COUNT) {
+      throw new Error(`UPGRADE_FLAVOR["${building.id}"] has ${flavor.length} entries, expected ${FLAVOR_TIER_COUNT}.`);
     }
 
     for (let i = 0; i < 21; i++) {

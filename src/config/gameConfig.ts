@@ -16,6 +16,8 @@ export const GAME_CONFIG = {
     peakBonusMaxRate: 0.1,
   },
   bugs: {
+    minTechDebtToSpawn: 100,
+    minProductionToSpawn: 1,
     noSpawnThreshold: 1,
     minorOnlyThreshold: 2,
     majorThreshold: 10,

@@ -153,7 +153,9 @@ export function getMaxActiveBugs(rawLocPerSec: number, techDebt: number): number
 }
 
 export function getBugSpawnInterval(rawLocPerSec: number, techDebt: number): { min: number; max: number } {
-  if (techDebt < 100 && rawLocPerSec < 1) return { min: Number.POSITIVE_INFINITY, max: Number.POSITIVE_INFINITY };
+  if (techDebt < GAME_CONFIG.bugs.minTechDebtToSpawn && rawLocPerSec < GAME_CONFIG.bugs.minProductionToSpawn) {
+    return { min: Number.POSITIVE_INFINITY, max: Number.POSITIVE_INFINITY };
+  }
 
   const tdRatio = rawLocPerSec > 0 ? techDebt / rawLocPerSec : 0;
 

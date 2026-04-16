@@ -27,15 +27,29 @@ export interface ProductionResult {
  * Compute all production values in a single pass.
  * Shared multipliers are computed once and reused across all buildings.
  */
+// Memoize purchasedSet by array reference (avoids new Set() every tick)
+let _purchasedCache: { arr: string[]; set: Set<string> } | null = null;
+
+function getPurchasedSet(purchasedUpgrades: string[]): Set<string> {
+  if (_purchasedCache && _purchasedCache.arr === purchasedUpgrades) return _purchasedCache.set;
+  const set = new Set(purchasedUpgrades);
+  _purchasedCache = { arr: purchasedUpgrades, set };
+  return set;
+}
+
 export function computeAllProduction(state: GameState): ProductionResult {
   const now = Date.now();
-  const purchasedSet = new Set(state.purchasedUpgrades);
+  const purchasedSet = getPurchasedSet(state.purchasedUpgrades);
   const shared = computeSharedMultiplierProduct(state, purchasedSet, now);
 
-  // Build owned-count lookup once (avoids repeated .find() in loops)
+  // Build owned-count + per-building multiplier lookups once
   const ownedCounts = new Map<string, number>();
+  const buildingMults = new Map<string, number>();
   for (const b of state.buildings) {
-    if (b.count > 0) ownedCounts.set(b.id, b.count);
+    if (b.count > 0) {
+      ownedCounts.set(b.id, b.count);
+      buildingMults.set(b.id, computeBuildingMultiplier(b.id, purchasedSet));
+    }
   }
 
   // Raw LoC/s (without TD penalty) — needed for TD penalty formula
@@ -43,7 +57,7 @@ export function computeAllProduction(state: GameState): ProductionResult {
   for (const def of BUILDINGS) {
     const count = ownedCounts.get(def.id);
     if (!count) continue;
-    rawLocPerSec += count * def.baseProduction * computeBuildingMultiplier(def.id, purchasedSet) * shared;
+    rawLocPerSec += count * def.baseProduction * (buildingMults.get(def.id) ?? 1) * shared;
   }
 
   // TD multiplier (depends on raw production)
@@ -58,7 +72,7 @@ export function computeAllProduction(state: GameState): ProductionResult {
   for (const def of BUILDINGS) {
     const count = ownedCounts.get(def.id);
     if (!count) continue;
-    const base = count * def.baseProduction * computeBuildingMultiplier(def.id, purchasedSet) * shared * tdMultiplier;
+    const base = count * def.baseProduction * (buildingMults.get(def.id) ?? 1) * shared * tdMultiplier;
     buildingProductions.set(def.id, base);
     if (base > highest) highest = base;
   }
@@ -76,15 +90,15 @@ export function computeAllProduction(state: GameState): ProductionResult {
     }
   }
 
+  // Compute click value from unpaused locPerSec (CPS bonus stays during refactoring)
+  const clickValue = computeClickValue(state, purchasedSet, locPerSec, now);
+
   const isRefactoring = (state.refactoringUntil ?? 0) > now;
   if (isRefactoring) locPerSec = 0;
 
   // Tech debt per second
   const isFrozen = state.activeBuffs.some((b) => b.expiresAt > now && b.tdFreeze);
   const techDebtPerSec = isFrozen ? 0 : computeNetTdPerSecond(state, purchasedSet);
-
-  // Click value
-  const clickValue = computeClickValue(state, purchasedSet, locPerSec, now);
 
   return {
     locPerSec,

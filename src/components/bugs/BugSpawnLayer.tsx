@@ -46,6 +46,8 @@ export function BugSpawnLayer() {
       getLifetime: (bug) => bug.lifetimeMs,
       onExpire,
       padding: 80,
+      paddingTop: 120,
+      paddingBottom: 80,
     },
     td,
   );

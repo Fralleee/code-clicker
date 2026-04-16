@@ -11,7 +11,7 @@ export function HelpDrawer({ open, onOpenChange }: Props) {
     <Drawer.Root direction="right" open={open} onOpenChange={onOpenChange}>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50" />
-        <Drawer.Content className="fixed top-0 right-0 bottom-0 w-[480px] z-50 bg-bg-surface border-l border-white/10 outline-none flex flex-col">
+        <Drawer.Content className="fixed top-0 right-0 bottom-0 w-full sm:w-120 z-50 bg-bg-surface border-l border-white/10 outline-none flex flex-col">
           <div className="p-5 border-b border-white/5">
             <Drawer.Title className="text-lg font-bold text-text-primary">How to Play</Drawer.Title>
             <Drawer.Description className="text-xs text-text-muted">

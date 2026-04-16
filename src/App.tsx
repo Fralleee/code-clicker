@@ -6,6 +6,7 @@ import { BugSpawnLayer } from "./components/bugs/BugSpawnLayer";
 import { CodeEditor } from "./components/clicker/CodeEditor";
 import { DebugDrawer } from "./components/debug/DebugDrawer";
 import { HelpDrawer } from "./components/help/HelpDrawer";
+import { MobileBottomNav } from "./components/layout/MobileBottomNav";
 import { StatsPanel } from "./components/layout/StatsPanel";
 import { TopBar } from "./components/layout/TopBar";
 import { PrestigeModal } from "./components/prestige/PrestigeModal";
@@ -67,20 +68,20 @@ export default function App() {
       <ActiveBuffBar />
 
       <div className="flex flex-1 min-h-0">
-        {/* Left panel - Stats & Achievements */}
-        <aside className="flex-1 min-w-56 border-r border-white/5 bg-bg-surface overflow-hidden">
+        {/* Left panel - Stats & Achievements (desktop only) */}
+        <aside className="hidden lg:flex lg:flex-col flex-1 min-w-56 border-r border-white/5 bg-bg-surface overflow-hidden">
           <StatsPanel />
         </aside>
 
-        {/* Center - Code Editor (capped at 640x480) */}
-        <main className="shrink-0 p-4 flex items-start justify-center">
-          <div className="w-160 h-120">
+        {/* Center - Code Editor */}
+        <main className="flex-1 p-2 lg:p-4 lg:shrink-0 lg:flex-none flex items-start justify-center min-h-0 pb-16 lg:pb-0">
+          <div className="w-full h-full max-w-160 lg:w-160 lg:h-120">
             <CodeEditor />
           </div>
         </main>
 
-        {/* Right panel - Shop */}
-        <aside className="flex-1 min-w-72 border-l border-white/5 bg-bg-surface overflow-hidden">
+        {/* Right panel - Shop (desktop only) */}
+        <aside className="hidden lg:flex lg:flex-col flex-1 min-w-72 border-l border-white/5 bg-bg-surface overflow-hidden">
           <ShopPanel />
         </aside>
       </div>
@@ -99,6 +100,7 @@ export default function App() {
       <BuffSpawnLayer />
       <BugSpawnLayer />
       <DebugDrawer />
+      <MobileBottomNav onPrestigeClick={() => setPrestigeOpen(true)} onHelpClick={() => setHelpOpen(true)} />
     </div>
   );
 }

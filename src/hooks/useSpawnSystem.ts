@@ -15,6 +15,8 @@ export interface SpawnConfig<T> {
   getLifetime: (item: T) => number;
   onExpire?: (item: SpawnedItem<T>) => void;
   padding?: number;
+  paddingTop?: number;
+  paddingBottom?: number;
 }
 
 let globalKey = 0;
@@ -38,9 +40,11 @@ export function useSpawnSystem<T>(config: SpawnConfig<T>, rescheduleTrigger?: un
         if (!configRef.current.canSpawn(current)) return current;
 
         const data = configRef.current.createItem();
-        const pad = configRef.current.padding ?? 100;
-        const x = Math.max(0, pad + Math.random() * Math.max(0, window.innerWidth - pad * 2));
-        const y = Math.max(0, pad + Math.random() * Math.max(0, window.innerHeight - pad * 2));
+        const padX = configRef.current.padding ?? 100;
+        const padTop = configRef.current.paddingTop ?? padX;
+        const padBottom = configRef.current.paddingBottom ?? padX;
+        const x = Math.max(0, padX + Math.random() * Math.max(0, window.innerWidth - padX * 2));
+        const y = Math.max(0, padTop + Math.random() * Math.max(0, window.innerHeight - padTop - padBottom));
 
         return [...current, { key: globalKey++, data, x, y, spawnedAt: Date.now() }];
       });

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGameStore } from "../../store/gameStore";
 import {
   selectCanPrestige,
@@ -36,6 +36,14 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
   const isRefactoring = (refactoringUntil ?? 0) > Date.now();
   const refactorRemaining = isRefactoring ? Math.ceil(((refactoringUntil ?? 0) - Date.now()) / 1000) : 0;
 
+  // Force re-render every second during refactoring so the countdown ticks
+  const [, setRenderTick] = useState(0);
+  useEffect(() => {
+    if (!isRefactoring) return;
+    const interval = setInterval(() => setRenderTick((t) => t + 1), 1000);
+    return () => clearInterval(interval);
+  }, [isRefactoring]);
+
   return (
     <header className="flex items-center justify-between px-6 py-2.5 bg-bg-editor-bar border-b border-white/5 shrink-0">
       {/* Left: resource stats */}
@@ -52,13 +60,7 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-1">
             <span className="text-[10px] text-text-muted uppercase w-12">Per sec</span>
-            {isRefactoring ? (
-              <span className="font-mono text-sm text-accent-gold font-semibold animate-pulse">
-                Refactoring... {refactorRemaining}s
-              </span>
-            ) : (
-              <span className="font-mono text-sm text-accent-cyan font-semibold">{formatRate(locPerSec)}</span>
-            )}
+            <span className="font-mono text-sm text-accent-cyan font-semibold">{formatRate(locPerSec)}</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="text-[10px] text-text-muted uppercase w-12">Per click</span>

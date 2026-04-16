@@ -17,7 +17,11 @@ function formatTime(seconds: number): string {
   return `${h}h ${m}m`;
 }
 
-export function StatsPanel() {
+interface StatsPanelProps {
+  hideHacks?: boolean;
+}
+
+export function StatsPanel({ hideHacks = false }: StatsPanelProps) {
   const state = useGameStore.getState();
   const totalLoc = useGameStore((s) => s.resources.totalLoCEarned);
   const totalClicks = useGameStore((s) => s.resources.totalClicks);
@@ -59,8 +63,8 @@ export function StatsPanel() {
         </div>
       </div>
 
-      {/* Hacks - below stats */}
-      {showHacks && (
+      {/* Hacks - below stats (hidden in mobile Stats drawer since Hacks has its own tab) */}
+      {showHacks && !hideHacks && (
         <div className="shrink-0 border-t border-white/5 pt-3 mt-3">
           <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Hacks</h3>
           <HackPanel />

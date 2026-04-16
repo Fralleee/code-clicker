@@ -54,7 +54,7 @@ export function MobileBottomNav({ onHelpClick }: Props) {
 
       {/* Stats Drawer */}
       <MobileDrawer title="Stats" open={activeDrawer === "stats"} onClose={closeDrawer}>
-        <StatsPanel />
+        <StatsPanel hideHacks />
         <div className="p-3 border-t border-white/5">
           {confirmingRestart ? (
             <div className="flex items-center justify-center gap-2">

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useGameStore } from "../../store/gameStore";
 import {
   selectCanPrestige,
@@ -15,6 +16,8 @@ interface Props {
 }
 
 export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
+  const resetGame = useGameStore((s) => s.resetGame);
+  const [confirmingRestart, setConfirmingRestart] = useState(false);
   const loc = useGameStore((s) => s.resources.linesOfCode);
   const td = useGameStore((s) => s.resources.techDebt);
   const refactorDebt = useGameStore((s) => s.refactorDebt);
@@ -110,6 +113,36 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
 
       {/* Right: actions */}
       <div className="flex items-center gap-2">
+        {confirmingRestart ? (
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-accent-pink font-semibold">Erase all progress?</span>
+            <button
+              type="button"
+              onClick={() => {
+                resetGame();
+                setConfirmingRestart(false);
+              }}
+              className="px-2 py-1 rounded text-xs font-semibold bg-accent-pink/20 text-accent-pink border border-accent-pink/40 hover:bg-accent-pink/30 cursor-pointer transition-colors"
+            >
+              Yes, restart
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmingRestart(false)}
+              className="px-2 py-1 rounded text-xs font-semibold text-text-muted hover:text-text-primary hover:bg-white/5 cursor-pointer transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setConfirmingRestart(true)}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-accent-pink/60 hover:text-accent-pink hover:bg-accent-pink/10 cursor-pointer transition-colors"
+          >
+            Restart
+          </button>
+        )}
         <button
           type="button"
           onClick={onHelpClick}

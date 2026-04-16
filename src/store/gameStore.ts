@@ -5,6 +5,7 @@ import { BUILDINGS } from "../data/buildings";
 import { HACKS } from "../data/hacks";
 import { getPrestigeThreshold, PRESTIGE_UPGRADES } from "../data/prestige";
 import { UPGRADES } from "../data/upgrades";
+import { computeAllProduction } from "../engine/production";
 import type { GameState, GameStore, OwnedBuilding } from "../types/game";
 import { calculateBuildingCost } from "../utils/calculations";
 import {
@@ -14,14 +15,7 @@ import {
   loadFromStorage,
   saveToStorage,
 } from "../utils/saveManager";
-import {
-  selectBuildingProduction,
-  selectClickValue,
-  selectCostReduction,
-  selectLocPerSecond,
-  selectNetTechDebtPerSecond,
-  selectReputationOnPrestige,
-} from "./selectors";
+import { selectClickValue, selectCostReduction, selectLocPerSecond, selectReputationOnPrestige } from "./selectors";
 
 function getStartingLoC(prestigeUpgrades: string[]): number {
   let loc = 0;
@@ -119,23 +113,18 @@ export const useGameStore = create<GameStore>()(
       const state = get();
       const deltaSec = deltaMs / 1000;
 
-      // Check if refactoring (paused production)
-      const isRefactoring = (state.refactoringUntil ?? 0) > Date.now();
+      // Compute all production values in a single pass
+      const production = computeAllProduction(state);
 
-      // LoC production (paused during refactoring)
-      const locPerSecond = isRefactoring ? 0 : selectLocPerSecond(state);
-      const locEarned = locPerSecond * deltaSec;
+      const locEarned = production.locPerSec * deltaSec;
       const newLoC = Math.max(0, state.resources.linesOfCode + locEarned);
       const locGain = Math.max(0, locEarned);
 
-      // Tech Debt from all buildings (frozen if Code Freeze hack active)
-      const isTdFrozen = state.activeBuffs.some((b) => b.expiresAt > Date.now() && b.tdFreeze);
-      const netTdPerSec = isTdFrozen ? 0 : selectNetTechDebtPerSecond(state);
-      const tdChange = netTdPerSec * deltaSec;
+      const tdChange = production.techDebtPerSec * deltaSec;
       const newTD = Math.max(0, (state.resources.techDebt ?? 0) + tdChange);
 
       const updatedBuildings = state.buildings.map((b) => {
-        const prod = selectBuildingProduction(state, b.id);
+        const prod = production.buildingProductions.get(b.id) ?? 0;
         return {
           ...b,
           totalProduced: b.totalProduced + Math.max(0, prod * deltaSec),
@@ -155,7 +144,7 @@ export const useGameStore = create<GameStore>()(
         stats: {
           ...state.stats,
           totalTimePlayed: state.stats.totalTimePlayed + deltaSec,
-          highestLocPerSecond: Math.max(state.stats.highestLocPerSecond, locPerSecond),
+          highestLocPerSecond: Math.max(state.stats.highestLocPerSecond, production.locPerSec),
         },
         lastTickTimestamp: Date.now(),
       });

@@ -21,15 +21,9 @@ let globalKey = 0;
 
 export function useSpawnSystem<T>(config: SpawnConfig<T>, rescheduleTrigger?: unknown) {
   const [items, setItems] = useState<SpawnedItem<T>[]>([]);
-  const itemsRef = useRef<SpawnedItem<T>[]>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const configRef = useRef(config);
   configRef.current = config;
-
-  // Keep ref in sync for expiry checks outside state updater
-  useEffect(() => {
-    itemsRef.current = items;
-  });
 
   const scheduleSpawn = useCallback(() => {
     const { min, max } = configRef.current.getInterval();
@@ -64,23 +58,23 @@ export function useSpawnSystem<T>(config: SpawnConfig<T>, rescheduleTrigger?: un
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
-      const current = itemsRef.current;
-      const alive: SpawnedItem<T>[] = [];
       const expired: SpawnedItem<T>[] = [];
 
-      for (const item of current) {
-        if (now - item.spawnedAt > configRef.current.getLifetime(item.data)) {
-          expired.push(item);
-        } else {
-          alive.push(item);
+      setItems((current) => {
+        expired.length = 0; // Reset for StrictMode double-invocation
+        const alive: SpawnedItem<T>[] = [];
+        for (const item of current) {
+          if (now - item.spawnedAt > configRef.current.getLifetime(item.data)) {
+            expired.push(item);
+          } else {
+            alive.push(item);
+          }
         }
-      }
+        return alive.length === current.length ? current : alive;
+      });
 
-      if (expired.length > 0) {
-        setItems(alive);
-        for (const item of expired) {
-          configRef.current.onExpire?.(item);
-        }
+      for (const item of expired) {
+        configRef.current.onExpire?.(item);
       }
     }, 500);
     return () => clearInterval(interval);

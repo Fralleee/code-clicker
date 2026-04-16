@@ -97,7 +97,7 @@ export function BuildingCard({ building, buyQuantity }: Props) {
           {owned > 0 && eachTD !== 0 && (
             <span className={`text-xs ${eachTD > 0 ? "text-accent-pink" : "text-accent-green"}`}>
               {eachTD > 0 ? "+" : ""}
-              {formatNumber(eachTD * owned)} TD
+              {formatNumber(eachTD * owned)}/s TD
             </span>
           )}
         </div>

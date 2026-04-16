@@ -100,7 +100,7 @@ export default function App() {
       <BuffSpawnLayer />
       <BugSpawnLayer />
       <DebugDrawer />
-      <MobileBottomNav onPrestigeClick={() => setPrestigeOpen(true)} onHelpClick={() => setHelpOpen(true)} />
+      <MobileBottomNav onHelpClick={() => setHelpOpen(true)} />
     </div>
   );
 }

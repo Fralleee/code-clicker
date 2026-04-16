@@ -8,7 +8,6 @@ import { StatsPanel } from "./StatsPanel";
 type MobileTab = "shop" | "hacks" | "stats";
 
 interface Props {
-  onPrestigeClick: () => void;
   onHelpClick: () => void;
 }
 
@@ -18,7 +17,10 @@ export function MobileBottomNav({ onHelpClick }: Props) {
   const [confirmingRestart, setConfirmingRestart] = useState(false);
 
   const openDrawer = (tab: MobileTab) => setActiveDrawer(tab);
-  const closeDrawer = () => setActiveDrawer(null);
+  const closeDrawer = () => {
+    setActiveDrawer(null);
+    setConfirmingRestart(false);
+  };
 
   return (
     <>
@@ -27,7 +29,15 @@ export function MobileBottomNav({ onHelpClick }: Props) {
         <NavButton icon="🏪" label="Shop" active={activeDrawer === "shop"} onClick={() => openDrawer("shop")} />
         <NavButton icon="🍝" label="Hacks" active={activeDrawer === "hacks"} onClick={() => openDrawer("hacks")} />
         <NavButton icon="📊" label="Stats" active={activeDrawer === "stats"} onClick={() => openDrawer("stats")} />
-        <NavButton icon="❓" label="Help" active={false} onClick={onHelpClick} />
+        <NavButton
+          icon="❓"
+          label="Help"
+          active={false}
+          onClick={() => {
+            closeDrawer();
+            onHelpClick();
+          }}
+        />
       </nav>
 
       {/* Shop Drawer */}

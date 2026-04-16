@@ -1,3 +1,4 @@
+import { GAME_CONFIG } from "../config/gameConfig";
 import type { PrestigeUpgradeDefinition } from "../types/game";
 
 export const PRESTIGE_UPGRADES: PrestigeUpgradeDefinition[] = [
@@ -140,10 +141,10 @@ export const PRESTIGE_UPGRADES: PrestigeUpgradeDefinition[] = [
   },
 ];
 
-export const BASE_PRESTIGE_THRESHOLD = 1_000_000;
+export const BASE_PRESTIGE_THRESHOLD = GAME_CONFIG.prestige.baseThreshold;
 
 export function getPrestigeThreshold(prestigeUpgrades: string[]): number {
-  return prestigeUpgrades.includes("tech_empire") ? 500_000 : BASE_PRESTIGE_THRESHOLD;
+  return prestigeUpgrades.includes("tech_empire") ? GAME_CONFIG.prestige.reducedThreshold : BASE_PRESTIGE_THRESHOLD;
 }
 
 export function calculateReputationEarned(totalLoCEarned: number, hasReputationBoost: boolean): number {

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { GAME_CONFIG } from "../config/gameConfig";
 import { useGameStore } from "../store/gameStore";
 
 export function useAutoSave() {
@@ -10,7 +11,7 @@ export function useAutoSave() {
 
     const interval = setInterval(() => {
       saveGame();
-    }, 30000);
+    }, GAME_CONFIG.autosave.intervalMs);
 
     const handleBeforeUnload = () => saveGame();
     window.addEventListener("beforeunload", handleBeforeUnload);

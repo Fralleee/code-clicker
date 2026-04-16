@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
+import { GAME_CONFIG } from "../config/gameConfig";
 import { BUILDINGS } from "../data/buildings";
 import { HACKS } from "../data/hacks";
 import { getPrestigeThreshold, PRESTIGE_UPGRADES } from "../data/prestige";
@@ -168,8 +169,7 @@ export const useGameStore = create<GameStore>()(
       const owned = state.buildings.find((b) => b.id === buildingId);
       const ownedCount = owned?.count ?? 0;
 
-      // Cap at 500
-      const maxBuy = Math.max(0, 500 - ownedCount);
+      const maxBuy = Math.max(0, GAME_CONFIG.buildings.maxCount - ownedCount);
       if (maxBuy <= 0) return false;
       const actualQty = Math.min(quantity, maxBuy);
 
@@ -267,7 +267,7 @@ export const useGameStore = create<GameStore>()(
       if (!saved) return false;
 
       const now = Date.now();
-      const elapsed = Math.min((now - saved.lastTickTimestamp) / 1000, 8 * 60 * 60);
+      const elapsed = Math.min((now - saved.lastTickTimestamp) / 1000, GAME_CONFIG.offline.maxSeconds);
       const locPerSec = selectLocPerSecond(saved);
       const offlineEarned = Math.max(0, locPerSec * elapsed);
 
@@ -452,13 +452,12 @@ export const useGameStore = create<GameStore>()(
       if (currentTD <= 0) return false;
       if ((state.refactoringUntil ?? 0) > Date.now()) return false;
 
-      // Pauses production for 10s, removes 70% of current TD
       set({
         resources: {
           ...state.resources,
-          techDebt: Math.max(0, currentTD * 0.3),
+          techDebt: Math.max(0, currentTD * GAME_CONFIG.techDebt.refactorRetainPercent),
         },
-        refactoringUntil: Date.now() + 10_000,
+        refactoringUntil: Date.now() + GAME_CONFIG.techDebt.refactorDurationMs,
       });
       return true;
     },

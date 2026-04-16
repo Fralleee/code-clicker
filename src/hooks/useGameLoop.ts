@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { GAME_CONFIG } from "../config/gameConfig";
 import { useGameStore } from "../store/gameStore";
 
 export function useGameLoop() {
@@ -9,7 +10,7 @@ export function useGameLoop() {
       const delta = now - lastTime;
       lastTime = now;
       useGameStore.getState().tick(delta);
-    }, 50);
+    }, GAME_CONFIG.tick.intervalMs);
     return () => clearInterval(interval);
   }, []);
 }

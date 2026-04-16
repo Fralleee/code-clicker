@@ -15,6 +15,7 @@ interface Props {
 }
 
 export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
+  const resetGame = useGameStore((s) => s.resetGame);
   const loc = useGameStore((s) => s.resources.linesOfCode);
   const td = useGameStore((s) => s.resources.techDebt);
   const refactorDebt = useGameStore((s) => s.refactorDebt);
@@ -110,6 +111,17 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
 
       {/* Right: actions */}
       <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            if (window.confirm("Are you sure you want to restart? All progress will be lost.")) {
+              resetGame();
+            }
+          }}
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold text-accent-pink/60 hover:text-accent-pink hover:bg-accent-pink/10 cursor-pointer transition-colors"
+        >
+          Restart
+        </button>
         <button
           type="button"
           onClick={onHelpClick}

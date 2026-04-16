@@ -2,14 +2,16 @@ import { GAME_CONFIG } from "../config/gameConfig";
 import { BUILDINGS } from "../data/buildings";
 import {
   ACHIEVEMENT_BY_ID,
-  BUILDING_BOOST_UPGRADES,
   CLICK_POWER_UPGRADES,
   CPS_CLICK_UPGRADES,
   GLOBAL_PRODUCTION_UPGRADES,
 } from "../data/lookups";
 import { getStandardUpgradeIds } from "../data/standardUpgrades";
 import type { GameState } from "../types/game";
+import { computeBuildingMultiplier } from "./multipliers";
 import { computeNetTdPerSecond, computeTdPenalty } from "./techDebt";
+
+export { computeBuildingMultiplier } from "./multipliers";
 
 export interface ProductionResult {
   locPerSec: number;
@@ -66,7 +68,7 @@ export function computeAllProduction(state: GameState): ProductionResult {
   for (const def of BUILDINGS) {
     const base = buildingProductions.get(def.id) ?? 0;
     if (base === 0) continue;
-    if (isMastered(state, def.id, purchasedSet)) {
+    if (isMastered(def.id, ownedCounts.get(def.id) ?? 0, purchasedSet)) {
       buildingProductions.set(def.id, highest);
       locPerSec += highest;
     } else {
@@ -93,18 +95,6 @@ export function computeAllProduction(state: GameState): ProductionResult {
     isRefactoring,
     buildingProductions,
   };
-}
-
-// === Shared helpers (used by both production and techDebt engines) ===
-
-export function computeBuildingMultiplier(buildingId: string, purchasedSet: Set<string>): number {
-  let multiplier = 1;
-  for (const boost of BUILDING_BOOST_UPGRADES.get(buildingId) ?? []) {
-    if (purchasedSet.has(boost.id)) {
-      multiplier *= boost.multiplier;
-    }
-  }
-  return multiplier;
 }
 
 // === Internal helpers ===
@@ -136,9 +126,8 @@ function computeSharedMultiplierProduct(state: GameState, purchasedSet: Set<stri
   return global * prestige * angel * achievement * buff * prestigeProd;
 }
 
-function isMastered(state: GameState, buildingId: string, purchasedSet: Set<string>): boolean {
-  const owned = state.buildings.find((b) => b.id === buildingId);
-  if (!owned || owned.count < GAME_CONFIG.buildings.masteryCount) return false;
+function isMastered(buildingId: string, ownedCount: number, purchasedSet: Set<string>): boolean {
+  if (ownedCount < GAME_CONFIG.buildings.masteryCount) return false;
   for (const upgradeId of getStandardUpgradeIds(buildingId)) {
     if (!purchasedSet.has(upgradeId)) return false;
   }

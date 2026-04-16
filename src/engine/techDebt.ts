@@ -4,7 +4,7 @@ import { BUILDINGS } from "../data/buildings";
 import { TD_REDUCTION_UPGRADES } from "../data/lookups";
 import { getStandardUpgradeIds } from "../data/standardUpgrades";
 import type { GameState } from "../types/game";
-import { computeBuildingMultiplier } from "./production";
+import { computeBuildingMultiplier } from "./multipliers";
 
 export interface TechDebtStatus {
   current: number;

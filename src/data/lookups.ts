@@ -1,10 +1,9 @@
-import type { AchievementDefinition, BuildingDefinition, UpgradeDefinition } from "../types/game";
+import type { AchievementDefinition, BuildingDefinition } from "../types/game";
 import { ACHIEVEMENTS } from "./achievements";
 import { BUILDINGS } from "./buildings";
 import { UPGRADES } from "./upgrades";
 
 // O(1) lookup by ID
-export const UPGRADE_BY_ID: ReadonlyMap<string, UpgradeDefinition> = new Map(UPGRADES.map((u) => [u.id, u]));
 export const ACHIEVEMENT_BY_ID: ReadonlyMap<string, AchievementDefinition> = new Map(
   ACHIEVEMENTS.map((a) => [a.id, a]),
 );

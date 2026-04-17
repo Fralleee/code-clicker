@@ -63,7 +63,7 @@ export default function App() {
   }, [hasWon, dismissedForShip, victoryOpen]);
 
   return (
-    <div className="flex flex-col h-screen bg-bg-deep">
+    <div className="flex flex-col h-full bg-bg-deep">
       <TopBar onPrestigeClick={() => setPrestigeOpen(true)} onHelpClick={() => setHelpOpen(true)} />
       <ActiveBuffBar />
 

@@ -72,7 +72,7 @@ export function StatsPanel({ hideHacks = false }: StatsPanelProps) {
       )}
 
       {/* Achievements - scrollable, fills remaining space */}
-      <div className="border-t border-white/5 pt-3 mt-3 flex-1 min-h-0 overflow-y-auto">
+      <div className="border-t border-white/5 pt-3 mt-3 flex-1 min-h-0 overflow-y-auto [scrollbar-gutter:stable]">
         <AchievementList />
       </div>
     </div>

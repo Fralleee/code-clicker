@@ -66,7 +66,7 @@ export function CodeEditor() {
       </div>
 
       {/* Code area */}
-      <div className="flex-1 bg-bg-editor overflow-y-auto p-4 font-mono text-sm leading-relaxed min-h-0">
+      <div className="flex-1 bg-bg-editor overflow-y-auto p-4 font-mono text-sm leading-relaxed min-h-0 [scrollbar-gutter:stable]">
         {lines.map((line, i) => (
           <div key={line.id} className="flex">
             <span className="w-8 text-right text-text-muted/40 mr-4 shrink-0 select-none">{i + 1}</span>

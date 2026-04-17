@@ -53,170 +53,173 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
   }, [isRefactoring]);
 
   return (
-    <header className="flex items-center justify-between px-3 lg:px-6 py-2 lg:py-2.5 bg-bg-editor-bar border-b border-white/5 shrink-0">
-      {/* Left: resource stats */}
-      <div className="flex items-center gap-2 lg:gap-5">
-        {/* Main LoC counter */}
-        <div className="flex items-center gap-1.5 lg:gap-3 pr-3 lg:pr-5 border-r border-white/10">
-          <div>
-            <div className="font-mono text-lg lg:text-2xl font-bold text-text-primary tracking-tight">
-              {formatNumber(loc)}
-            </div>
-            <div className="text-[10px] text-text-muted uppercase tracking-wider">Lines of Code</div>
+    <header className="flex items-stretch lg:items-center gap-2 lg:gap-5 px-3 lg:px-6 py-2 lg:py-2.5 bg-bg-editor-bar border-b border-white/5 shrink-0">
+      {/* Main LoC counter — full-height on mobile, leftmost */}
+      <div className="flex items-center shrink-0 pr-3 lg:pr-5 border-r border-white/10">
+        <div>
+          <div className="font-mono text-lg lg:text-2xl font-bold text-text-primary tracking-tight">
+            {formatNumber(loc)}
           </div>
+          <div className="text-[10px] text-text-muted uppercase tracking-wider">Lines of Code</div>
         </div>
-
-        {/* Mobile: inline LoC/s */}
-        <span className="font-mono text-xs text-accent-cyan font-semibold lg:hidden">{formatRate(locPerSec)}</span>
-
-        {/* Surge indicator */}
-        {surgeMultiplier > 1 && (
-          <div className="flex items-center gap-1 pl-2 lg:pl-5 border-l border-white/10">
-            <span className="text-accent-gold font-bold text-xs lg:text-sm animate-pulse">
-              ⚡ SURGE {surgeMultiplier}x
-            </span>
-          </div>
-        )}
-
-        {/* Desktop: production stats */}
-        <div className="hidden lg:flex flex-col gap-0.5">
-          <div className="flex items-center gap-1">
-            <span className="text-[10px] text-text-muted uppercase w-12">Per sec</span>
-            <span className="font-mono text-sm text-accent-cyan font-semibold">{formatRate(locPerSec)}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-[10px] text-text-muted uppercase w-12">Per click</span>
-            <span className="font-mono text-sm text-text-primary">{formatNumber(clickValue)}</span>
-          </div>
-        </div>
-
-        {/* Reputation (desktop only) */}
-        {reputation > 0 && (
-          <div className="hidden lg:flex flex-col gap-0.5 pl-5 border-l border-white/10">
-            <span className="font-mono text-sm text-accent-gold font-semibold">{formatNumber(reputation)}</span>
-            <span className="text-[10px] text-text-muted uppercase tracking-wider">Reputation</span>
-          </div>
-        )}
-
-        {/* Tech Debt indicator */}
-        {(hasTD || netTdPerSec !== 0) && (
-          <>
-            {/* Mobile: compact TD + refactor */}
-            <div className="flex items-center gap-1.5 pl-2 border-l border-white/10 lg:hidden">
-              <span className="font-mono text-xs text-accent-pink font-semibold">{formatNumber(td)}</span>
-              {penaltyPercent > 0 && <span className="text-[10px] text-accent-pink">-{penaltyPercent}%</span>}
-              {isRefactoring ? (
-                <span className="text-[10px] text-accent-gold font-semibold animate-pulse">{refactorRemaining}s</span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => refactorDebt()}
-                  disabled={td <= 0}
-                  className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-accent-green/10 text-accent-green border border-accent-green/20 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  Refactor
-                </button>
-              )}
-            </div>
-
-            {/* Desktop: full TD section */}
-            <div className="hidden lg:flex flex-col gap-0.5 pl-5 border-l border-white/10">
-              <div className="flex items-center gap-1.5">
-                <span className="font-mono text-sm text-accent-pink font-semibold">{formatNumber(td)}</span>
-                <span
-                  className={`text-[10px] font-mono ${netTdPerSec <= 0 ? "text-accent-green" : "text-accent-pink/60"}`}
-                >
-                  {netTdPerSec <= 0 ? "" : "+"}
-                  {formatNumber(netTdPerSec)}/s
-                </span>
-              </div>
-              <span className="text-[10px] text-text-muted uppercase tracking-wider">
-                Tech Debt
-                {penaltyPercent > 0 && (
-                  <span className="text-accent-pink ml-1 normal-case">(-{penaltyPercent}% LoC)</span>
-                )}
-              </span>
-              {isRefactoring ? (
-                <span className="mt-1 text-[10px] text-accent-gold font-semibold animate-pulse">
-                  Refactoring... {refactorRemaining}s
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => refactorDebt()}
-                  disabled={td <= 0}
-                  className="mt-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-accent-green/10 text-accent-green border border-accent-green/20 hover:bg-accent-green/20 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  title={`Pauses 10s, removes ${formatNumber(td * (refactorRemovalPercent / 100))} TD`}
-                >
-                  Refactor (-{refactorRemovalPercent}% TD)
-                </button>
-              )}
-            </div>
-          </>
-        )}
       </div>
 
-      {/* Right: actions */}
-      <div className="flex items-center gap-2">
-        {/* Restart (desktop only) */}
-        <div className="hidden lg:block">
-          {confirmingRestart ? (
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-accent-pink font-semibold">Erase all progress?</span>
-              <button
-                type="button"
-                onClick={() => {
-                  resetGame();
-                  setConfirmingRestart(false);
-                }}
-                className="px-2 py-1 rounded text-xs font-semibold bg-accent-pink/20 text-accent-pink border border-accent-pink/40 hover:bg-accent-pink/30 cursor-pointer transition-colors"
-              >
-                Yes, restart
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmingRestart(false)}
-                className="px-2 py-1 rounded text-xs font-semibold text-text-muted hover:text-text-primary hover:bg-white/5 cursor-pointer transition-colors"
-              >
-                Cancel
-              </button>
+      {/* Right side — mobile: stats row + actions row; desktop: stats left, actions right on single row */}
+      <div className="flex-1 min-w-0 flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between lg:gap-0">
+        {/* Stats */}
+        <div className="flex items-center gap-2 lg:gap-5 flex-wrap justify-end lg:justify-start">
+          {/* Mobile: inline LoC/s */}
+          <span className="font-mono text-xs text-accent-cyan font-semibold lg:hidden">{formatRate(locPerSec)}</span>
+
+          {/* Surge indicator */}
+          {surgeMultiplier > 1 && (
+            <div className="flex items-center gap-1 pl-2 lg:pl-5 border-l border-white/10">
+              <span className="text-accent-gold font-bold text-xs lg:text-sm animate-pulse">
+                ⚡ SURGE {surgeMultiplier}x
+              </span>
             </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setConfirmingRestart(true)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-accent-pink/60 hover:text-accent-pink hover:bg-accent-pink/10 cursor-pointer transition-colors"
-            >
-              Restart
-            </button>
+          )}
+
+          {/* Desktop: production stats */}
+          <div className="hidden lg:flex flex-col gap-0.5">
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-text-muted uppercase w-12">Per sec</span>
+              <span className="font-mono text-sm text-accent-cyan font-semibold">{formatRate(locPerSec)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-text-muted uppercase w-12">Per click</span>
+              <span className="font-mono text-sm text-text-primary">{formatNumber(clickValue)}</span>
+            </div>
+          </div>
+
+          {/* Reputation (desktop only) */}
+          {reputation > 0 && (
+            <div className="hidden lg:flex flex-col gap-0.5 pl-5 border-l border-white/10">
+              <span className="font-mono text-sm text-accent-gold font-semibold">{formatNumber(reputation)}</span>
+              <span className="text-[10px] text-text-muted uppercase tracking-wider">Reputation</span>
+            </div>
+          )}
+
+          {/* Tech Debt indicator */}
+          {(hasTD || netTdPerSec !== 0) && (
+            <>
+              {/* Mobile: compact TD + refactor */}
+              <div className="flex items-center gap-1.5 pl-2 border-l border-white/10 lg:hidden">
+                <span className="font-mono text-xs text-accent-pink font-semibold">{formatNumber(td)}</span>
+                {penaltyPercent > 0 && <span className="text-[10px] text-accent-pink">-{penaltyPercent}%</span>}
+                {isRefactoring ? (
+                  <span className="text-[10px] text-accent-gold font-semibold animate-pulse">{refactorRemaining}s</span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => refactorDebt()}
+                    disabled={td <= 0}
+                    className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-accent-green/10 text-accent-green border border-accent-green/20 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    Refactor
+                  </button>
+                )}
+              </div>
+
+              {/* Desktop: full TD section */}
+              <div className="hidden lg:flex flex-col gap-0.5 pl-5 border-l border-white/10">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono text-sm text-accent-pink font-semibold">{formatNumber(td)}</span>
+                  <span
+                    className={`text-[10px] font-mono ${netTdPerSec <= 0 ? "text-accent-green" : "text-accent-pink/60"}`}
+                  >
+                    {netTdPerSec <= 0 ? "" : "+"}
+                    {formatNumber(netTdPerSec)}/s
+                  </span>
+                </div>
+                <span className="text-[10px] text-text-muted uppercase tracking-wider">
+                  Tech Debt
+                  {penaltyPercent > 0 && (
+                    <span className="text-accent-pink ml-1 normal-case">(-{penaltyPercent}% LoC)</span>
+                  )}
+                </span>
+                {isRefactoring ? (
+                  <span className="mt-1 text-[10px] text-accent-gold font-semibold animate-pulse">
+                    Refactoring... {refactorRemaining}s
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => refactorDebt()}
+                    disabled={td <= 0}
+                    className="mt-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-accent-green/10 text-accent-green border border-accent-green/20 hover:bg-accent-green/20 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    title={`Pauses 10s, removes ${formatNumber(td * (refactorRemovalPercent / 100))} TD`}
+                  >
+                    Refactor (-{refactorRemovalPercent}% TD)
+                  </button>
+                )}
+              </div>
+            </>
           )}
         </div>
 
-        {/* Help (desktop only) */}
-        <button
-          type="button"
-          onClick={onHelpClick}
-          className="hidden lg:block px-3 py-1.5 rounded-lg text-xs font-semibold text-text-muted hover:text-text-primary hover:bg-white/5 cursor-pointer transition-colors"
-        >
-          Help
-        </button>
+        {/* Right: actions */}
+        <div className="flex items-center gap-2 justify-end lg:justify-start">
+          {/* Restart (desktop only) */}
+          <div className="hidden lg:block">
+            {confirmingRestart ? (
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-accent-pink font-semibold">Erase all progress?</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetGame();
+                    setConfirmingRestart(false);
+                  }}
+                  className="px-2 py-1 rounded text-xs font-semibold bg-accent-pink/20 text-accent-pink border border-accent-pink/40 hover:bg-accent-pink/30 cursor-pointer transition-colors"
+                >
+                  Yes, restart
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmingRestart(false)}
+                  className="px-2 py-1 rounded text-xs font-semibold text-text-muted hover:text-text-primary hover:bg-white/5 cursor-pointer transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmingRestart(true)}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold text-accent-pink/60 hover:text-accent-pink hover:bg-accent-pink/10 cursor-pointer transition-colors"
+              >
+                Restart
+              </button>
+            )}
+          </div>
 
-        <button
-          type="button"
-          onClick={onPrestigeClick}
-          disabled={!canPrestige}
-          className={`px-2 py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm transition-all ${
-            canPrestige
-              ? "bg-accent-gold/20 text-accent-gold border border-accent-gold/40 hover:bg-accent-gold/30 cursor-pointer animate-[pulse-gold_2s_ease-in-out_infinite]"
-              : "bg-white/5 text-text-muted border border-white/5 cursor-not-allowed"
-          }`}
-        >
-          Ship
-          <span className="hidden lg:inline"> Product</span>
-          {canPrestige && repOnPrestige > 0 && (
-            <span className="ml-1 text-xs opacity-75">+{formatNumber(repOnPrestige)} rep</span>
-          )}
-        </button>
+          {/* Help (desktop only) */}
+          <button
+            type="button"
+            onClick={onHelpClick}
+            className="hidden lg:block px-3 py-1.5 rounded-lg text-xs font-semibold text-text-muted hover:text-text-primary hover:bg-white/5 cursor-pointer transition-colors"
+          >
+            Help
+          </button>
+
+          <button
+            type="button"
+            onClick={onPrestigeClick}
+            disabled={!canPrestige}
+            className={`px-2 py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm transition-all ${
+              canPrestige
+                ? "bg-accent-gold/20 text-accent-gold border border-accent-gold/40 hover:bg-accent-gold/30 cursor-pointer animate-[pulse-gold_2s_ease-in-out_infinite]"
+                : "bg-white/5 text-text-muted border border-white/5 cursor-not-allowed"
+            }`}
+          >
+            Ship
+            <span className="hidden lg:inline"> Product</span>
+            {canPrestige && repOnPrestige > 0 && (
+              <span className="ml-1 text-xs opacity-75">+{formatNumber(repOnPrestige)} rep</span>
+            )}
+          </button>
+        </div>
       </div>
     </header>
   );

@@ -90,7 +90,7 @@ export function BugSpawnLayer() {
       {items.map((b) => (
         <BugOrb key={b.key} spawned={b} onClick={() => handleFix(b)} />
       ))}
-      <div className="fixed top-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-50 pointer-events-none">
+      <div className="fixed top-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-60 pointer-events-none">
         {messages.map((m) => (
           <div
             key={m.key}
@@ -194,7 +194,7 @@ function BugOrb({ spawned, onClick }: { spawned: SpawnedItem<BugDefinition>; onC
     <button
       type="button"
       onClick={onClick}
-      className={`fixed z-40 rounded-full border-2 bg-gradient-to-br flex items-center justify-center cursor-pointer transition-transform hover:scale-125 active:scale-90 ${sizeClass} ${borderClass} ${bgClass}`}
+      className={`fixed z-60 pointer-events-auto rounded-full border-2 bg-gradient-to-br flex items-center justify-center cursor-pointer transition-transform hover:scale-125 active:scale-90 ${sizeClass} ${borderClass} ${bgClass}`}
       style={{
         left: spawned.x,
         top: spawned.y,

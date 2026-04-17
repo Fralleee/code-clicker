@@ -86,7 +86,7 @@ export function BuffSpawnLayer() {
     <>
       {spawned && <SpawnedBuffButton key={spawned.key} spawned={spawned} onClick={() => handleClick(spawned)} />}
 
-      <div className="fixed top-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-50 pointer-events-none">
+      <div className="fixed top-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-60 pointer-events-none">
         {messages.map((m) => (
           <div
             key={m.key}
@@ -127,7 +127,7 @@ function SpawnedBuffButton({ spawned, onClick }: { spawned: SpawnedItem<BuffDefi
     <button
       type="button"
       onClick={onClick}
-      className={`fixed z-40 w-16 h-16 rounded-full border-2 bg-gradient-to-br flex items-center justify-center text-3xl cursor-pointer transition-transform hover:scale-125 active:scale-90 ${rarityStyles[spawned.data.rarity]}`}
+      className={`fixed z-60 pointer-events-auto w-16 h-16 rounded-full border-2 bg-gradient-to-br flex items-center justify-center text-3xl cursor-pointer transition-transform hover:scale-125 active:scale-90 ${rarityStyles[spawned.data.rarity]}`}
       style={{
         left: spawned.x,
         top: spawned.y,

@@ -26,7 +26,6 @@ export function BuildingCard({ building, buyQuantity }: Props) {
   const qty = resolveQuantity(buyQuantity, building, owned, loc);
   const totalProduction = selectBuildingProduction(state, building.id);
   const buildingMult = selectBuildingMultiplier(state, building.id);
-  const eachLoC = building.baseProduction * buildingMult;
   const purchased = getPurchasedSet(state);
   const tdModifier =
     building.techDebtRatio > 0
@@ -81,10 +80,7 @@ export function BuildingCard({ building, buyQuantity }: Props) {
               {isMaxCount ? "MAX" : `x${owned}`}
             </span>
           </div>
-          <div className="text-xs text-text-muted truncate">
-            {building.description}
-            <span className="ml-1 text-text-secondary">({formatNumber(eachLoC)}/s each)</span>
-          </div>
+          <div className="text-xs text-text-muted truncate">{building.description}</div>
         </div>
       </div>
       {/* Bottom row: colored stats — full width */}

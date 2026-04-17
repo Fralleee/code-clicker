@@ -81,7 +81,7 @@ export function computeTechDebtStatus(
   };
 }
 
-// === Internal helpers ===
+// === TD modifier helpers ===
 
 export function computeTdReduction(buildingId: string, purchasedSet: Set<string>): number {
   let reduction = 1;

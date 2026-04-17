@@ -126,7 +126,8 @@ export function HelpDrawer({ open, onOpenChange }: Props) {
             <Section title="Hacks" icon="🍝">
               <p>
                 Temporary boosts that add Tech Debt. Requires the <strong>Hacker Mindset</strong> prestige upgrade
-                (5,000 rep). Individual hacks unlock at LoC milestones. TD costs scale with your current production.
+                (5,000 rep). Individual hacks unlock at LoC milestones. Requires your TD to be below a threshold to
+                activate. TD costs scale with your current production.
               </p>
               <ul className="list-none space-y-1 mt-2">
                 <li>

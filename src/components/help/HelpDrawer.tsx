@@ -74,7 +74,7 @@ export function HelpDrawer({ open, onOpenChange }: Props) {
                 </li>
               </ul>
               <p className="mt-2">
-                Each building costs more as you buy more (1.3x per unit). Use <strong>Buy x1/x10/x100/Max</strong> to
+                Each building costs more as you buy more (1.15x per unit). Use <strong>Buy x1/x10/x100/Max</strong> to
                 bulk purchase.
               </p>
             </Section>

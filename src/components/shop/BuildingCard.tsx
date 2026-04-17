@@ -57,8 +57,9 @@ export function BuildingCard({ building, buyQuantity }: Props) {
             : "bg-bg-card/50 border-white/5 cursor-not-allowed opacity-60"
       }`}
     >
+      {/* Top row: icon + name + description */}
       <div className="flex items-center gap-3">
-        <div className="relative">
+        <div className="relative shrink-0">
           <span className="text-2xl">{building.icon}</span>
           {isMastered && (
             <span className="absolute -top-1 -right-2 px-1 py-0.5 rounded text-[8px] font-black bg-accent-green text-bg-deep leading-none">
@@ -67,39 +68,38 @@ export function BuildingCard({ building, buyQuantity }: Props) {
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-text-primary text-sm">
-              {building.name}
-              <span className="ml-1.5 font-normal text-text-muted text-xs">({formatNumber(eachLoC)} LoC/s each)</span>
-            </span>
-            <span className={`font-mono text-xs ${isMaxCount ? "text-accent-gold" : "text-text-secondary"}`}>
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-semibold text-text-primary text-sm truncate">{building.name}</span>
+            <span className={`font-mono text-xs shrink-0 ${isMaxCount ? "text-accent-gold" : "text-text-secondary"}`}>
               {isMaxCount ? "MAX" : `x${owned}`}
             </span>
           </div>
-          <div className="text-xs text-text-muted truncate">{building.description}</div>
-          <div className="flex items-center justify-between mt-1">
-            {isMaxCount ? (
-              <span className="text-xs text-accent-gold font-semibold">
-                {isMastered ? "Mastered!" : `${owned}/${MAX_BUILDING_COUNT}`}
-              </span>
-            ) : (
-              <span className={`font-mono text-xs ${canAfford ? "text-accent-green" : "text-accent-pink"}`}>
-                {displayQty > 1 ? `${displayQty}x ` : ""}
-                {formatNumber(totalCost)} LoC
-              </span>
-            )}
-            <div className="flex items-center gap-2">
-              {totalProduction > 0 && (
-                <span className="text-xs text-accent-cyan">total: {formatNumber(totalProduction)}/s</span>
-              )}
-              {owned > 0 && eachTD !== 0 && (
-                <span className={`text-xs ${eachTD > 0 ? "text-accent-pink" : "text-accent-green"}`}>
-                  {eachTD > 0 ? "+" : ""}
-                  {formatNumber(eachTD * owned)}/s TD
-                </span>
-              )}
-            </div>
+          <div className="text-xs text-text-muted truncate">
+            {building.description}
+            <span className="ml-1 text-text-secondary">({formatNumber(eachLoC)}/s each)</span>
           </div>
+        </div>
+      </div>
+      {/* Bottom row: colored stats — full width */}
+      <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-white/5">
+        {isMaxCount ? (
+          <span className="text-xs text-accent-gold font-semibold">
+            {isMastered ? "Mastered!" : `${owned}/${MAX_BUILDING_COUNT}`}
+          </span>
+        ) : (
+          <span className={`font-mono text-xs ${canAfford ? "text-accent-green" : "text-accent-pink"}`}>
+            {displayQty > 1 ? `${displayQty}x ` : ""}
+            {formatNumber(totalCost)} LoC
+          </span>
+        )}
+        <div className="flex items-center gap-3">
+          {totalProduction > 0 && <span className="text-xs text-accent-cyan">{formatNumber(totalProduction)}/s</span>}
+          {owned > 0 && eachTD !== 0 && (
+            <span className={`text-xs whitespace-nowrap ${eachTD > 0 ? "text-accent-pink" : "text-accent-green"}`}>
+              {eachTD > 0 ? "+" : ""}
+              {formatNumber(eachTD * owned)}/s TD
+            </span>
+          )}
         </div>
       </div>
     </button>

@@ -23,7 +23,7 @@ function DebugDrawerInner() {
       <Drawer.Trigger asChild>
         <button
           type="button"
-          className="fixed bottom-2 left-2 z-50 px-2 py-1 rounded text-[10px] font-mono bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 cursor-pointer opacity-50 hover:opacity-100 transition-opacity"
+          className="fixed bottom-16 lg:bottom-2 left-2 z-50 px-2 py-1 rounded text-[10px] font-mono bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 cursor-pointer opacity-50 hover:opacity-100 transition-opacity"
         >
           DEBUG
         </button>

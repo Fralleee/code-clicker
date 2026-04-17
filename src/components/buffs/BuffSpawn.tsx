@@ -29,6 +29,8 @@ export function BuffSpawnLayer() {
     canSpawn: (current) => current.length === 0,
     createItem: () => pickRandomBuff(),
     getLifetime: () => SPAWN_DURATION,
+    paddingTop: 120,
+    paddingBottom: 80,
   });
 
   const handleClick = useCallback(

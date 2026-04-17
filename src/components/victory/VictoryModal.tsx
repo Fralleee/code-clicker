@@ -90,7 +90,7 @@ export function VictoryModal({ open, onClose }: Props) {
 
           {/* Building roster */}
           <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">Your Team</h2>
-          <div className="grid grid-cols-3 gap-2 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">
             {BUILDINGS.map((def) => {
               const owned = buildings.find((b) => b.id === def.id);
               return (

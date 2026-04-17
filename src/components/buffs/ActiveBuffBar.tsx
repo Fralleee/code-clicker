@@ -22,7 +22,7 @@ export function ActiveBuffBar() {
   if (active.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-1.5 lg:gap-2 px-2 lg:px-4 py-1 lg:py-1.5 bg-bg-editor-bar/50 border-b border-white/5 overflow-x-hidden">
+    <div className="flex items-center gap-1.5 lg:gap-2 px-2 lg:px-4 py-1 lg:py-1.5 bg-bg-editor-bar/50 border-b border-white/5 overflow-x-auto [scrollbar-gutter:stable]">
       <span className="text-xs text-text-muted">Active:</span>
       {active.map((buff) => {
         const def = BUFFS.find((b) => b.id === buff.buffId);

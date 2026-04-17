@@ -113,17 +113,16 @@ export function ShopPanel() {
               <div className="sticky -top-2 -mx-2 px-2 pt-2 pb-2 mb-2 bg-bg-surface z-10">
                 <button
                   type="button"
-                  disabled={!upgrades.some((u) => useGameStore.getState().resources.linesOfCode >= u.cost)}
+                  disabled={!upgrades.some((u) => state.resources.linesOfCode >= u.cost)}
                   onClick={() => {
                     let bought = true;
                     while (bought) {
                       bought = false;
                       const s = useGameStore.getState();
                       const visible = selectVisibleUpgrades(s);
-                      const sorted = [...visible].sort((a, b) => a.cost - b.cost);
-                      for (const upgrade of sorted) {
+                      for (const upgrade of visible) {
                         if (s.resources.linesOfCode >= upgrade.cost) {
-                          useGameStore.getState().buyUpgrade(upgrade.id);
+                          s.buyUpgrade(upgrade.id);
                           bought = true;
                           break;
                         }

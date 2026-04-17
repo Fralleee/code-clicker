@@ -16,7 +16,12 @@ export function useLocalStorageState<T>(key: string, initial: T, validate?: (val
 
   useEffect(() => {
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      const serialized = JSON.stringify(value);
+      if (serialized === undefined) {
+        localStorage.removeItem(key);
+        return;
+      }
+      localStorage.setItem(key, serialized);
     } catch {
       // localStorage unavailable — ignore
     }

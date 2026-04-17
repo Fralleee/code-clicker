@@ -48,4 +48,13 @@ describe("useLocalStorageState", () => {
     expect(result.current[0]).toBe(10);
     expect(JSON.parse(localStorage.getItem(KEY) ?? "null")).toBe(10);
   });
+
+  it("removes the key when the new value serializes to undefined", () => {
+    localStorage.setItem(KEY, JSON.stringify(1));
+    const { result } = renderHook(() => useLocalStorageState<number | undefined>(KEY, 1));
+    act(() => {
+      result.current[1](undefined);
+    });
+    expect(localStorage.getItem(KEY)).toBeNull();
+  });
 });

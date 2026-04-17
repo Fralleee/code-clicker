@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+// `key` is assumed stable for the lifetime of the component; changing it won't re-read storage.
 export function useLocalStorageState<T>(key: string, initial: T, validate?: (value: unknown) => value is T) {
   const [value, setValue] = useState<T>(() => {
     try {

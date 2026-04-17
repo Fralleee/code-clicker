@@ -93,7 +93,7 @@ export function computeTdReduction(buildingId: string, purchasedSet: Set<string>
   return reduction;
 }
 
-function computeCleanerBonus(buildingId: string, techDebtRatio: number, purchasedSet: Set<string>): number {
+export function computeCleanerBonus(buildingId: string, techDebtRatio: number, purchasedSet: Set<string>): number {
   if (techDebtRatio >= 0) return 1;
   const standardIds = getStandardUpgradeIds(buildingId);
   let boosts = 0;

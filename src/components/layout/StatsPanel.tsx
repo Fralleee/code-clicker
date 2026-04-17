@@ -64,7 +64,7 @@ export function StatsPanel({ hideHacks = false }: StatsPanelProps) {
       </div>
 
       {/* Hacks - below stats (hidden in mobile Stats drawer since Hacks has its own tab) */}
-      {showHacks && !hideHacks && (
+      {showHacks && (
         <div className="shrink-0 border-t border-white/5 pt-3 mt-3">
           <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Hacks</h3>
           <HackPanel />

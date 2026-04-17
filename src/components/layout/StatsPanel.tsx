@@ -28,14 +28,14 @@ export function StatsPanel({ hideHacks = false }: StatsPanelProps) {
   const timePlayed = useGameStore((s) => s.stats.totalTimePlayed);
   const timesShipped = useGameStore((s) => s.prestige.timesShipped);
   const reputation = useGameStore((s) => s.prestige.totalReputationEarned);
-  const totalLoCEarned = useGameStore((s) => s.resources.totalLoCEarned);
 
   const locPerSec = selectLocPerSecond(state);
   const clickValue = selectClickValue(state);
   const prestigeMult = selectPrestigeMultiplier(state);
   const totalBuildings = selectTotalBuildings(state);
 
-  const showHacks = totalLoCEarned >= 1000;
+  const hasHackAccess = state.prestige.prestigeUpgrades.includes("hack_access");
+  const showHacks = hasHackAccess && !hideHacks;
 
   // Force re-render on tick
   useGameStore((s) => s.resources.linesOfCode);

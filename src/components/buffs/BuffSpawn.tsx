@@ -5,7 +5,7 @@ import { pickRandomBuff } from "../../data/buffs";
 import type { SpawnedItem } from "../../hooks/useSpawnSystem";
 import { useSpawnSystem } from "../../hooks/useSpawnSystem";
 import { useGameStore } from "../../store/gameStore";
-import { selectClickValue, selectLocPerSecond } from "../../store/selectors";
+import { selectClickValue, selectIsSurgeActive, selectLocPerSecond } from "../../store/selectors";
 
 const SPAWN_DURATION = GAME_CONFIG.buffs.spawnDurationMs;
 
@@ -22,10 +22,14 @@ export function BuffSpawnLayer() {
   const [messages, setMessages] = useState<BuffMessageItem[]>([]);
 
   const { items, removeItem } = useSpawnSystem<BuffDefinition>({
-    getInterval: () => ({
-      min: GAME_CONFIG.buffs.minSpawnIntervalMs,
-      max: GAME_CONFIG.buffs.maxSpawnIntervalMs,
-    }),
+    getInterval: () => {
+      const surgeActive = selectIsSurgeActive(useGameStore.getState());
+      const divisor = surgeActive ? 2 : 1;
+      return {
+        min: GAME_CONFIG.buffs.minSpawnIntervalMs / divisor,
+        max: GAME_CONFIG.buffs.maxSpawnIntervalMs / divisor,
+      };
+    },
     canSpawn: (current) => current.length === 0,
     createItem: () => pickRandomBuff(),
     getLifetime: () => SPAWN_DURATION,
@@ -50,6 +54,7 @@ export function BuffSpawnLayer() {
       if (result.productionMultiplier || result.clickMultiplier) {
         let duration = result.duration ?? 30;
         if (state.prestige.prestigeUpgrades.includes("buff_mastery")) duration *= 2;
+        if (selectIsSurgeActive(state)) duration *= 2;
         state.addBuff({
           id: `${item.data.id}_${Date.now()}`,
           buffId: item.data.id,

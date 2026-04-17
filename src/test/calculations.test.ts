@@ -11,7 +11,7 @@ describe("calculateBuildingCost", () => {
 
   it("scales cost with owned count", () => {
     const cost1 = calculateBuildingCost(intern, 1);
-    expect(cost1).toBe(Math.floor(15 * 1.15));
+    expect(cost1).toBe(Math.floor(15 * intern.costMultiplier));
   });
 
   it("increases exponentially", () => {

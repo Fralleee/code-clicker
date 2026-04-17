@@ -7,6 +7,7 @@ import {
   selectLocPerSecond,
   selectNetTechDebtPerSecond,
   selectReputationOnPrestige,
+  selectSurgeMultiplier,
   selectTechDebtMultiplier,
 } from "../../store/selectors";
 import { formatNumber, formatRate } from "../../utils/formatNumber";
@@ -32,6 +33,7 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
   const prestigeUpgrades = useGameStore((s) => s.prestige.prestigeUpgrades);
   const netTdPerSec = selectNetTechDebtPerSecond(state);
   const debtMult = selectTechDebtMultiplier(state);
+  const surgeMultiplier = selectSurgeMultiplier(state);
 
   const hasTD = td > 0;
   const penaltyPercent = Math.round((1 - debtMult) * 100);
@@ -66,6 +68,15 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
 
         {/* Mobile: inline LoC/s */}
         <span className="font-mono text-xs text-accent-cyan font-semibold lg:hidden">{formatRate(locPerSec)}</span>
+
+        {/* Surge indicator */}
+        {surgeMultiplier > 1 && (
+          <div className="flex items-center gap-1 pl-2 lg:pl-5 border-l border-white/10">
+            <span className="text-accent-gold font-bold text-xs lg:text-sm animate-pulse">
+              ⚡ SURGE {surgeMultiplier}x
+            </span>
+          </div>
+        )}
 
         {/* Desktop: production stats */}
         <div className="hidden lg:flex flex-col gap-0.5">

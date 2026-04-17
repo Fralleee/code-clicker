@@ -15,7 +15,13 @@ import {
   loadFromStorage,
   saveToStorage,
 } from "../utils/saveManager";
-import { selectClickValue, selectCostReduction, selectLocPerSecond, selectReputationOnPrestige } from "./selectors";
+import {
+  selectClickValue,
+  selectCostReduction,
+  selectIsSurgeActive,
+  selectLocPerSecond,
+  selectReputationOnPrestige,
+} from "./selectors";
 
 function getStartingLoC(prestigeUpgrades: string[]): number {
   let loc = 0;
@@ -72,6 +78,7 @@ function createInitialState(
     activeBuffs: [],
     hackCooldowns: {},
     refactoringUntil: 0,
+    surgeStartedAt: null,
     prestige: prestigeState,
     settings: {
       autoSaveEnabled: true,
@@ -136,6 +143,15 @@ export const useGameStore = create<GameStore>()(
         };
       });
 
+      // Manage surge state
+      const surgeActive = selectIsSurgeActive(state);
+      let surgeStartedAt = state.surgeStartedAt;
+      if (surgeActive && !surgeStartedAt) {
+        surgeStartedAt = Date.now();
+      } else if (!surgeActive) {
+        surgeStartedAt = null;
+      }
+
       set({
         resources: {
           ...state.resources,
@@ -146,6 +162,7 @@ export const useGameStore = create<GameStore>()(
           peakTechDebt: Math.max(state.resources.peakTechDebt ?? 0, newTD),
         },
         buildings: updatedBuildings,
+        surgeStartedAt,
         stats: {
           ...state.stats,
           totalTimePlayed: state.stats.totalTimePlayed + deltaSec,

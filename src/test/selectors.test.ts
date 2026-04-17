@@ -48,6 +48,7 @@ function createTestState(overrides: Partial<GameState> = {}): GameState {
       startedAt: Date.now(),
     },
     refactoringUntil: 0,
+    surgeStartedAt: null,
     lastSaveTimestamp: Date.now(),
     lastTickTimestamp: Date.now(),
     gameVersion: "1.0.0",

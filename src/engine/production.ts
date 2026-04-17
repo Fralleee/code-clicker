@@ -19,6 +19,7 @@ export interface ProductionResult {
   techDebtPerSec: number;
   clickValue: number;
   tdMultiplier: number;
+  surgeMultiplier: number;
   isRefactoring: boolean;
   buildingProductions: Map<string, number>;
 }
@@ -90,6 +91,17 @@ export function computeAllProduction(state: GameState): ProductionResult {
     }
   }
 
+  // Apply surge multiplier if active
+  let surgeMultiplier = 1;
+  if (state.surgeStartedAt) {
+    const surgeElapsed = (now - state.surgeStartedAt) / 1000;
+    surgeMultiplier = GAME_CONFIG.surge.startMultiplier + Math.floor(surgeElapsed / GAME_CONFIG.surge.intervalSec);
+    locPerSec *= surgeMultiplier;
+    for (const [id, prod] of buildingProductions) {
+      buildingProductions.set(id, prod * surgeMultiplier);
+    }
+  }
+
   // Compute click value from unpaused locPerSec (CPS bonus stays during refactoring)
   const clickValue = computeClickValue(state, purchasedSet, locPerSec, now);
 
@@ -106,6 +118,7 @@ export function computeAllProduction(state: GameState): ProductionResult {
     techDebtPerSec,
     clickValue,
     tdMultiplier,
+    surgeMultiplier,
     isRefactoring,
     buildingProductions,
   };

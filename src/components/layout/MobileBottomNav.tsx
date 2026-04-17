@@ -14,6 +14,7 @@ interface Props {
 export function MobileBottomNav({ onHelpClick }: Props) {
   const [activeDrawer, setActiveDrawer] = useState<MobileTab | null>(null);
   const resetGame = useGameStore((s) => s.resetGame);
+  const hasHackAccess = useGameStore((s) => s.prestige.prestigeUpgrades.includes("hack_access"));
   const [confirmingRestart, setConfirmingRestart] = useState(false);
 
   const openDrawer = (tab: MobileTab) => {
@@ -30,7 +31,9 @@ export function MobileBottomNav({ onHelpClick }: Props) {
       {/* Fixed bottom navigation bar */}
       <nav className="fixed bottom-0 inset-x-0 z-30 lg:hidden flex items-center justify-around bg-bg-editor-bar border-t border-white/5 px-2 py-1 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
         <NavButton icon="🏪" label="Shop" active={activeDrawer === "shop"} onClick={() => openDrawer("shop")} />
-        <NavButton icon="🍝" label="Hacks" active={activeDrawer === "hacks"} onClick={() => openDrawer("hacks")} />
+        {hasHackAccess && (
+          <NavButton icon="🍝" label="Hacks" active={activeDrawer === "hacks"} onClick={() => openDrawer("hacks")} />
+        )}
         <NavButton icon="📊" label="Stats" active={activeDrawer === "stats"} onClick={() => openDrawer("stats")} />
         <NavButton
           icon="❓"

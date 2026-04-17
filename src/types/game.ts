@@ -133,6 +133,7 @@ export interface GameState {
   settings: GameSettings;
   stats: GameStats;
   refactoringUntil: number;
+  surgeStartedAt: number | null;
   lastSaveTimestamp: number;
   lastTickTimestamp: number;
   gameVersion: string;

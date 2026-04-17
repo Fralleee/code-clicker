@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { getStandardUpgradeIds } from "../data/standardUpgrades";
 import { useGameStore } from "../store/gameStore";
 
 function resetStore() {
@@ -159,7 +160,7 @@ describe("gameStore", () => {
   });
 
   describe("activateHack", () => {
-    it("adds tech debt and sets cooldown", () => {
+    it("fails without hack_access prestige upgrade", () => {
       useGameStore.setState({
         resources: {
           ...useGameStore.getState().resources,
@@ -167,6 +168,22 @@ describe("gameStore", () => {
           totalLoCEarned: 100_000,
         },
         buildings: useGameStore.getState().buildings.map((b) => (b.id === "intern" ? { ...b, count: 50 } : b)),
+      });
+      expect(useGameStore.getState().activateHack("spaghetti_sprint")).toBe(false);
+    });
+
+    it("adds tech debt and sets cooldown with hack_access", () => {
+      useGameStore.setState({
+        resources: {
+          ...useGameStore.getState().resources,
+          linesOfCode: 100_000,
+          totalLoCEarned: 100_000,
+        },
+        buildings: useGameStore.getState().buildings.map((b) => (b.id === "intern" ? { ...b, count: 50 } : b)),
+        prestige: {
+          ...useGameStore.getState().prestige,
+          prestigeUpgrades: ["hack_access"],
+        },
       });
       const tdBefore = useGameStore.getState().resources.techDebt;
       const result = useGameStore.getState().activateHack("spaghetti_sprint");
@@ -181,9 +198,37 @@ describe("gameStore", () => {
           ...useGameStore.getState().resources,
           totalLoCEarned: 100_000,
         },
+        prestige: {
+          ...useGameStore.getState().prestige,
+          prestigeUpgrades: ["hack_access"],
+        },
         hackCooldowns: { spaghetti_sprint: Date.now() + 60_000 },
       });
       expect(useGameStore.getState().activateHack("spaghetti_sprint")).toBe(false);
+    });
+  });
+
+  describe("surge state", () => {
+    it("sets surgeStartedAt when 9 buildings mastered", () => {
+      // Master 9 buildings
+      const upgrades: string[] = [];
+      const buildings = useGameStore.getState().buildings.map((b, i) => {
+        if (i < 9) {
+          upgrades.push(...getStandardUpgradeIds(b.id));
+          return { ...b, count: 500 };
+        }
+        return b;
+      });
+      useGameStore.setState({ buildings, purchasedUpgrades: upgrades });
+
+      expect(useGameStore.getState().surgeStartedAt).toBeNull();
+      useGameStore.getState().tick(50);
+      expect(useGameStore.getState().surgeStartedAt).not.toBeNull();
+    });
+
+    it("does not set surgeStartedAt below threshold", () => {
+      useGameStore.getState().tick(50);
+      expect(useGameStore.getState().surgeStartedAt).toBeNull();
     });
   });
 

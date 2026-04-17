@@ -18,7 +18,7 @@ import type { GameState } from "../types/game";
 
 let _upgradeSetCache: { upgrades: string[]; set: Set<string> } | null = null;
 
-function getPurchasedSet(state: GameState): Set<string> {
+export function getPurchasedSet(state: GameState): Set<string> {
   if (_upgradeSetCache && _upgradeSetCache.upgrades === state.purchasedUpgrades) {
     return _upgradeSetCache.set;
   }
@@ -408,7 +408,20 @@ export function selectTotalBuildings(state: GameState): number {
 
 // === Win Condition ===
 
+export function selectMasteredCount(state: GameState): number {
+  return BUILDINGS.filter((def) => selectBuildingMastery(state, def.id)).length;
+}
+
+export function selectIsSurgeActive(state: GameState): boolean {
+  return selectMasteredCount(state) >= GAME_CONFIG.surge.masteryThreshold;
+}
+
+export function selectSurgeMultiplier(state: GameState): number {
+  if (!state.surgeStartedAt) return 1;
+  const elapsed = Math.max(0, (Date.now() - state.surgeStartedAt) / 1000);
+  return GAME_CONFIG.surge.startMultiplier + Math.floor(elapsed / GAME_CONFIG.surge.intervalSec);
+}
+
 export function selectHasWon(state: GameState): boolean {
-  // Win = every building has mastery (500 count + all its upgrades)
   return BUILDINGS.every((def) => selectBuildingMastery(state, def.id));
 }

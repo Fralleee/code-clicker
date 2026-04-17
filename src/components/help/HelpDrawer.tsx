@@ -74,7 +74,7 @@ export function HelpDrawer({ open, onOpenChange }: Props) {
                 </li>
               </ul>
               <p className="mt-2">
-                Each building costs more as you buy more (1.15x per unit). Use <strong>Buy x1/x10/x100/Max</strong> to
+                Each building costs more as you buy more (1.3x per unit). Use <strong>Buy x1/x10/x100/Max</strong> to
                 bulk purchase.
               </p>
             </Section>
@@ -125,8 +125,9 @@ export function HelpDrawer({ open, onOpenChange }: Props) {
 
             <Section title="Hacks" icon="🍝">
               <p>
-                Temporary boosts that add Tech Debt. Unlock at LoC milestones. Requires your TD to be below a threshold
-                to activate. TD costs scale with your current production.
+                Temporary boosts that add Tech Debt. Requires the <strong>Hacker Mindset</strong> prestige upgrade
+                (5,000 rep). Individual hacks unlock at LoC milestones. Requires your TD to be below a threshold to
+                activate. TD costs scale with your current production.
               </p>
               <ul className="list-none space-y-1 mt-2">
                 <li>
@@ -192,6 +193,23 @@ export function HelpDrawer({ open, onOpenChange }: Props) {
               <p className="mt-2">
                 <strong>Master all 12 buildings</strong> to beat the game and see the Victory screen with your final
                 stats!
+              </p>
+            </Section>
+
+            <Section title="Endgame Surge" icon="⚡">
+              <p>
+                When <strong>9 or more buildings</strong> achieve Mastery, an{" "}
+                <strong className="text-accent-gold">Escalating Surge</strong> activates:
+              </p>
+              <ul className="list-disc list-inside space-y-1 mt-2">
+                <li>
+                  Production multiplier starts at <strong>2x</strong> and increases by 1x every 30 seconds
+                </li>
+                <li>Buffs spawn twice as fast with doubled duration</li>
+                <li>The surge resets when you prestige</li>
+              </ul>
+              <p className="mt-2 text-accent-gold text-xs">
+                The final push — master the last 3 buildings with an ever-growing production boost!
               </p>
             </Section>
 

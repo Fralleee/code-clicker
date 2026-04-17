@@ -81,9 +81,9 @@ export function computeTechDebtStatus(
   };
 }
 
-// === Internal helpers ===
+// === TD modifier helpers ===
 
-function computeTdReduction(buildingId: string, purchasedSet: Set<string>): number {
+export function computeTdReduction(buildingId: string, purchasedSet: Set<string>): number {
   let reduction = 1;
   for (const up of TD_REDUCTION_UPGRADES.get(buildingId) ?? []) {
     if (purchasedSet.has(up.id)) {
@@ -93,7 +93,7 @@ function computeTdReduction(buildingId: string, purchasedSet: Set<string>): numb
   return reduction;
 }
 
-function computeCleanerBonus(buildingId: string, techDebtRatio: number, purchasedSet: Set<string>): number {
+export function computeCleanerBonus(buildingId: string, techDebtRatio: number, purchasedSet: Set<string>): number {
   if (techDebtRatio >= 0) return 1;
   const standardIds = getStandardUpgradeIds(buildingId);
   let boosts = 0;

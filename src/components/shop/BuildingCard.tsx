@@ -1,5 +1,7 @@
+import { computeCleanerBonus, computeTdReduction } from "../../engine/techDebt";
 import { useGameStore } from "../../store/gameStore";
 import {
+  getPurchasedSet,
   selectBuildingMastery,
   selectBuildingMultiplier,
   selectBuildingProduction,
@@ -25,7 +27,12 @@ export function BuildingCard({ building, buyQuantity }: Props) {
   const totalProduction = selectBuildingProduction(state, building.id);
   const buildingMult = selectBuildingMultiplier(state, building.id);
   const eachLoC = building.baseProduction * buildingMult;
-  const eachTD = building.baseProduction * building.techDebtRatio * buildingMult;
+  const purchased = getPurchasedSet(state);
+  const tdModifier =
+    building.techDebtRatio > 0
+      ? computeTdReduction(building.id, purchased)
+      : computeCleanerBonus(building.id, building.techDebtRatio, purchased);
+  const eachTD = building.baseProduction * building.techDebtRatio * buildingMult * tdModifier;
   const isMastered = selectBuildingMastery(state, building.id);
   const isMaxCount = owned >= MAX_BUILDING_COUNT;
 

@@ -72,6 +72,14 @@ export const PRESTIGE_UPGRADES: PrestigeUpgradeDefinition[] = [
     effect: "free_senior",
   },
   {
+    id: "hack_access",
+    name: "Hacker Mindset",
+    description: "Unlock Hacks — temporary boosts that add Tech Debt",
+    cost: 5_000,
+    icon: "🍝",
+    effect: "hack_access",
+  },
+  {
     id: "scaling_expert",
     name: "Scaling Expert",
     description: "+25% to all production permanently",

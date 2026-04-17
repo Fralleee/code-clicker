@@ -49,4 +49,9 @@ export const GAME_CONFIG = {
   autosave: {
     intervalMs: 30_000,
   },
+  surge: {
+    masteryThreshold: 9,
+    startMultiplier: 2,
+    intervalSec: 30,
+  },
 } as const;

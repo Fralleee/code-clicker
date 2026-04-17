@@ -7,10 +7,13 @@ import {
   selectBuildingProduction,
   selectClickValue,
   selectHasWon,
+  selectIsSurgeActive,
   selectLocPerSecond,
+  selectMasteredCount,
   selectNetTechDebtPerSecond,
   selectPrestigeMultiplier,
   selectRawLocPerSecond,
+  selectSurgeMultiplier,
   selectTechDebtMultiplier,
   selectTotalBuildings,
 } from "../store/selectors";
@@ -48,6 +51,7 @@ function createTestState(overrides: Partial<GameState> = {}): GameState {
       startedAt: Date.now(),
     },
     refactoringUntil: 0,
+    surgeStartedAt: null,
     lastSaveTimestamp: Date.now(),
     lastTickTimestamp: Date.now(),
     gameVersion: "1.0.0",
@@ -309,5 +313,52 @@ describe("selectTotalBuildings", () => {
       junior_dev: 3,
     });
     expect(selectTotalBuildings(state)).toBe(8);
+  });
+});
+
+describe("surge selectors", () => {
+  function createMasteredState(masteredCount: number) {
+    const counts: Record<string, number> = {};
+    const upgrades: string[] = [];
+    for (let i = 0; i < masteredCount && i < BUILDINGS.length; i++) {
+      counts[BUILDINGS[i].id] = 500;
+      upgrades.push(...getStandardUpgradeIds(BUILDINGS[i].id));
+    }
+    let state = withBuildings(createTestState(), counts);
+    state = { ...state, purchasedUpgrades: upgrades };
+    return state;
+  }
+
+  it("selectMasteredCount returns correct count", () => {
+    expect(selectMasteredCount(createMasteredState(0))).toBe(0);
+    expect(selectMasteredCount(createMasteredState(3))).toBe(3);
+    expect(selectMasteredCount(createMasteredState(9))).toBe(9);
+  });
+
+  it("selectIsSurgeActive is false below threshold", () => {
+    expect(selectIsSurgeActive(createMasteredState(8))).toBe(false);
+  });
+
+  it("selectIsSurgeActive is true at threshold", () => {
+    expect(selectIsSurgeActive(createMasteredState(9))).toBe(true);
+  });
+
+  it("selectSurgeMultiplier returns 1 when no surge", () => {
+    expect(selectSurgeMultiplier(createTestState())).toBe(1);
+  });
+
+  it("selectSurgeMultiplier grows over time", () => {
+    const now = Date.now();
+    const state = { ...createTestState(), surgeStartedAt: now - 65_000 };
+    const mult = selectSurgeMultiplier(state);
+    // 65s elapsed: startMultiplier(2) + floor(65/30) = 2 + 2 = 4
+    expect(mult).toBe(4);
+  });
+
+  it("selectSurgeMultiplier handles clock backwards gracefully", () => {
+    const state = { ...createTestState(), surgeStartedAt: Date.now() + 10_000 };
+    const mult = selectSurgeMultiplier(state);
+    // Negative elapsed clamped to 0: startMultiplier(2) + floor(0/30) = 2
+    expect(mult).toBe(2);
   });
 });

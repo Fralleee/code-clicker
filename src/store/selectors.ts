@@ -18,7 +18,7 @@ import type { GameState } from "../types/game";
 
 let _upgradeSetCache: { upgrades: string[]; set: Set<string> } | null = null;
 
-function getPurchasedSet(state: GameState): Set<string> {
+export function getPurchasedSet(state: GameState): Set<string> {
   if (_upgradeSetCache && _upgradeSetCache.upgrades === state.purchasedUpgrades) {
     return _upgradeSetCache.set;
   }

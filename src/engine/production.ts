@@ -94,7 +94,7 @@ export function computeAllProduction(state: GameState): ProductionResult {
   // Apply surge multiplier if active
   let surgeMultiplier = 1;
   if (state.surgeStartedAt) {
-    const surgeElapsed = (now - state.surgeStartedAt) / 1000;
+    const surgeElapsed = Math.max(0, (now - state.surgeStartedAt) / 1000);
     surgeMultiplier = GAME_CONFIG.surge.startMultiplier + Math.floor(surgeElapsed / GAME_CONFIG.surge.intervalSec);
     locPerSec *= surgeMultiplier;
     for (const [id, prod] of buildingProductions) {

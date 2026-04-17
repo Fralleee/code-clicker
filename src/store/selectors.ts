@@ -418,7 +418,7 @@ export function selectIsSurgeActive(state: GameState): boolean {
 
 export function selectSurgeMultiplier(state: GameState): number {
   if (!state.surgeStartedAt) return 1;
-  const elapsed = (Date.now() - state.surgeStartedAt) / 1000;
+  const elapsed = Math.max(0, (Date.now() - state.surgeStartedAt) / 1000);
   return GAME_CONFIG.surge.startMultiplier + Math.floor(elapsed / GAME_CONFIG.surge.intervalSec);
 }
 

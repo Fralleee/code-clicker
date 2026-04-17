@@ -3,7 +3,7 @@ import { BUILDINGS } from "../data/buildings";
 import { calculateBuildingCost, calculateMaxAffordable, MAX_BUILDING_COUNT } from "../utils/calculations";
 
 describe("calculateBuildingCost", () => {
-  const intern = BUILDINGS[0]; // baseCost: 15, costMultiplier: 1.15
+  const intern = BUILDINGS[0];
 
   it("returns base cost for first unit", () => {
     expect(calculateBuildingCost(intern, 0)).toBe(15);

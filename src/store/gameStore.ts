@@ -313,6 +313,7 @@ export const useGameStore = create<GameStore>()(
           (id) => !id.startsWith("pm_") && id !== "auto_pm_meetings",
         ),
         refactoringUntil: saved.refactoringUntil ?? 0,
+        surgeStartedAt: saved.surgeStartedAt ? now : null,
         prestige: {
           ...saved.prestige,
           lifetimeLoCEarned: saved.prestige.lifetimeLoCEarned ?? 0,
@@ -375,6 +376,7 @@ export const useGameStore = create<GameStore>()(
 
     activateHack: (hackId: string) => {
       const state = get();
+      if (!state.prestige.prestigeUpgrades.includes("hack_access")) return false;
       const hack = HACKS.find((h) => h.id === hackId);
       if (!hack) return false;
 

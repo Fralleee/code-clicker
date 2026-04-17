@@ -20,22 +20,26 @@ let msgKey = 0;
 
 export function BuffSpawnLayer() {
   const [messages, setMessages] = useState<BuffMessageItem[]>([]);
+  const surgeStartedAt = useGameStore((s) => s.surgeStartedAt);
 
-  const { items, removeItem } = useSpawnSystem<BuffDefinition>({
-    getInterval: () => {
-      const surgeActive = selectIsSurgeActive(useGameStore.getState());
-      const divisor = surgeActive ? 2 : 1;
-      return {
-        min: GAME_CONFIG.buffs.minSpawnIntervalMs / divisor,
-        max: GAME_CONFIG.buffs.maxSpawnIntervalMs / divisor,
-      };
+  const { items, removeItem } = useSpawnSystem<BuffDefinition>(
+    {
+      getInterval: () => {
+        const surgeActive = selectIsSurgeActive(useGameStore.getState());
+        const divisor = surgeActive ? 2 : 1;
+        return {
+          min: GAME_CONFIG.buffs.minSpawnIntervalMs / divisor,
+          max: GAME_CONFIG.buffs.maxSpawnIntervalMs / divisor,
+        };
+      },
+      canSpawn: (current) => current.length === 0,
+      createItem: () => pickRandomBuff(),
+      getLifetime: () => SPAWN_DURATION,
+      paddingTop: 120,
+      paddingBottom: 80,
     },
-    canSpawn: (current) => current.length === 0,
-    createItem: () => pickRandomBuff(),
-    getLifetime: () => SPAWN_DURATION,
-    paddingTop: 120,
-    paddingBottom: 80,
-  });
+    surgeStartedAt,
+  );
 
   const handleClick = useCallback(
     (item: SpawnedItem<BuffDefinition>) => {

@@ -1,9 +1,9 @@
 import { useState } from "react";
+import { useLocalStorageState } from "../../hooks/useLocalStorageState";
 import { useGameStore } from "../../store/gameStore";
 import { selectVisibleBuildings, selectVisibleUpgrades } from "../../store/selectors";
 import type { BuyQuantity } from "../../types/game";
 import { formatNumber } from "../../utils/formatNumber";
-import { useLocalStorageState } from "../../utils/useLocalStorageState";
 import { BuildingCard } from "./BuildingCard";
 import { UpgradeCard } from "./UpgradeCard";
 

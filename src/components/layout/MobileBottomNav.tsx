@@ -16,7 +16,10 @@ export function MobileBottomNav({ onHelpClick }: Props) {
   const resetGame = useGameStore((s) => s.resetGame);
   const [confirmingRestart, setConfirmingRestart] = useState(false);
 
-  const openDrawer = (tab: MobileTab) => setActiveDrawer(tab);
+  const openDrawer = (tab: MobileTab) => {
+    setActiveDrawer(tab);
+    setConfirmingRestart(false);
+  };
   const closeDrawer = () => {
     setActiveDrawer(null);
     setConfirmingRestart(false);

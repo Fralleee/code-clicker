@@ -313,7 +313,7 @@ export const useGameStore = create<GameStore>()(
           (id) => !id.startsWith("pm_") && id !== "auto_pm_meetings",
         ),
         refactoringUntil: saved.refactoringUntil ?? 0,
-        surgeStartedAt: saved.surgeStartedAt ? now : null,
+        surgeStartedAt: saved.surgeStartedAt != null ? now : null,
         prestige: {
           ...saved.prestige,
           lifetimeLoCEarned: saved.prestige.lifetimeLoCEarned ?? 0,

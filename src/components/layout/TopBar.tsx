@@ -101,10 +101,22 @@ export function TopBar({ onPrestigeClick, onHelpClick }: Props) {
         {/* Tech Debt indicator */}
         {(hasTD || netTdPerSec !== 0) && (
           <>
-            {/* Mobile: compact TD */}
+            {/* Mobile: compact TD + refactor */}
             <div className="flex items-center gap-1.5 pl-2 border-l border-white/10 lg:hidden">
               <span className="font-mono text-xs text-accent-pink font-semibold">{formatNumber(td)}</span>
               {penaltyPercent > 0 && <span className="text-[10px] text-accent-pink">-{penaltyPercent}%</span>}
+              {isRefactoring ? (
+                <span className="text-[10px] text-accent-gold font-semibold animate-pulse">{refactorRemaining}s</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => refactorDebt()}
+                  disabled={td <= 0}
+                  className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-accent-green/10 text-accent-green border border-accent-green/20 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  Refactor
+                </button>
+              )}
             </div>
 
             {/* Desktop: full TD section */}
